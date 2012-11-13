@@ -63,4 +63,14 @@ class Exxx_Exception extends Exception
         $this->devMessage = $newDevMessage;
         return $this;
     }
+
+    /**
+     * convert this object into a printable string
+     * @return string
+     */
+    public function __toString()
+    {
+        $msg = $this->getMessage() . ' in ' . $this->getFile() . ' at line ' . $this->getLine();
+        return $msg;
+    }
 }

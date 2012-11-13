@@ -21,12 +21,10 @@
 namespace DataSift\Stone\HttpLib\Transports;
 
 use Exception;
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\HttpLib\HttpClientConnection;
 use DataSift\Stone\HttpLib\HttpClientRequest;
 use DataSift\Stone\HttpLib\HttpClientResponse;
-use DataSift\Stone\StatsLib\StatsdClient;
 
 /**
  * Support for dealing with content that is chunked
@@ -43,12 +41,11 @@ class HttpDefaultTransport extends HttpTransport
     /**
      * Read data from the connection
      *
-     * @param Context $context the global state that we're allowed to use
      * @param HttpClientConnection $connection our connection to the HTTP server
      * @param HttpClientResponse $response where we put the results
      * @return mixed null on error, otherwise the size of the content read
      */
-    public function readContent(Context $context, HttpClientConnection $connection, HttpClientResponse $response)
+    public function readContent(HttpClientConnection $connection, HttpClientResponse $response)
     {
         // cannot read if we do not have an open socket
         if (!$connection->isConnected())
@@ -71,7 +68,7 @@ class HttpDefaultTransport extends HttpTransport
         $chunkSize = strlen($body);
 
         // how many bodies have we received?
-        $context->stats->increment('response.body');
+        // $context->stats->increment('response.body');
 
         // does the connection need to close?
         if ($response->connectionMustClose())

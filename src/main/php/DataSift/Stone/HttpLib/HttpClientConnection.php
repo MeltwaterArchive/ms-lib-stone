@@ -21,7 +21,6 @@
 namespace DataSift\Stone\HttpLib;
 
 use Exception;
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\StatsLib\StatsdClient;
 
@@ -61,7 +60,7 @@ class HttpClientConnection
      * @param int $timeout
      * @return boolean did we successfully connect?
      */
-    public function connect(Context $context, HttpAddress $address)
+    public function connect(HttpAddress $address)
     {
         // timers!
         //var_dump('>> CONNECTING');
@@ -86,20 +85,20 @@ class HttpClientConnection
         //var_dump('>> CONNECTED');
 
         // log some stats
-        $context->stats->timing('connect.open', $microEnd - $microStart);
+        // $context->stats->timing('connect.open', $microEnd - $microStart);
 
         // what happened?
         if (!is_resource($this->socket))
         {
             // connection failed
             // log it
-            $context->stats->increment('connect.failed');
-            $context->stats->timing('connect.close', $microEnd - $microStart);
+            // $context->stats->increment('connect.failed');
+            // $context->stats->timing('connect.close', $microEnd - $microStart);
             return false;
         }
 
         // if we get here, we have a successful connection
-        $context->stats->increment('connect.success');
+        // $context->stats->increment('connect.success');
 
         $this->connectStart = $microStart;
         $this->connectEnd   = $microEnd;
@@ -107,7 +106,7 @@ class HttpClientConnection
         return true;
     }
 
-    public function waitForServerClose(Context $context)
+    public function waitForServerClose()
     {
         if (!$this->isConnected())
         {
@@ -120,7 +119,7 @@ class HttpClientConnection
     /**
      * Disconnect from the HTTP server
      */
-    public function disconnect(Context $context)
+    public function disconnect()
     {
         if (!$this->isConnected())
         {
@@ -130,8 +129,8 @@ class HttpClientConnection
         fclose($this->socket);
         $this->socket = null;
 
-        $context->stats->increment('connect.disconnect');
-        $context->stats->timing('connect.close', microtime(true) - $this->connectStart);
+        //$context->stats->increment('connect.disconnect');
+        //$context->stats->timing('connect.close', microtime(true) - $this->connectStart);
     }
 
     /**

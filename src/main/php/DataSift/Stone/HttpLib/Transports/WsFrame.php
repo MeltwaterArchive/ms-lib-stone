@@ -21,12 +21,10 @@
 namespace DataSift\Stone\HttpLib\Transports;
 
 use Exception;
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\HttpLib\HttpClientConnection;
 use DataSift\Stone\HttpLib\HttpClientRequest;
 use DataSift\Stone\HttpLib\HttpClientResponse;
-use DataSift\Stone\StatsLib\StatsdClient;
 
 /**
  * Support for talking to a HTTP server via WebSockets

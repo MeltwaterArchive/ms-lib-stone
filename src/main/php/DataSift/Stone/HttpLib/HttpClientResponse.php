@@ -20,8 +20,8 @@
 
 namespace DataSift\Stone\HttpLib;
 
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\HttpLib\Transports\WsFrame;
+use DataSift\Stone\LogLib\Log;
 
 /**
  * Represents a response received from the HTTP server
@@ -246,6 +246,7 @@ class HttpClientResponse
         // var_dump('>> decodeChunk()');
         // var_dump($chunk);
         $this->chunks[] = rtrim($chunk, "\r\n");
+        Log::write(Log::LOG_DEBUG, end($this->chunks));
     }
 
     /**

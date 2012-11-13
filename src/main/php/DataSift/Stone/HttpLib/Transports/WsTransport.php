@@ -21,12 +21,10 @@
 namespace DataSift\Stone\HttpLib\Transports;
 
 use Exception;
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\HttpLib\HttpClientConnection;
 use DataSift\Stone\HttpLib\HttpClientRequest;
 use DataSift\Stone\HttpLib\HttpClientResponse;
-use DataSift\Stone\StatsLib\StatsdClient;
 
 /**
  * Support for talking to a HTTP server via WebSockets
@@ -46,13 +44,11 @@ class WsTransport extends HttpTransport
      * This is here for exotic transports (like web sockets) to override when
      * they need to do something funky
      *
-     * @param Context $context
-     *     the *only* global state that we're allowed to use
      * @param HttpClientRequest $request
      *     the request that the user wants to send
      *     we add any additional headers to the request object
      */
-    public function addAdditionalHeadersToRequest(Context $context, HttpClientRequest $request)
+    public function addAdditionalHeadersToRequest(HttpClientRequest $request)
     {
         // build the headers
         $request->withExtraHeader('Upgrade', 'websocket')
@@ -102,8 +98,6 @@ class WsTransport extends HttpTransport
      * Exotic transports (such as websockets) should override this
      *
      * @link http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17
-     * @param Context $context
-     *     the *only* global state that we're allowed to use
      * @param HttpClientConnection $connection
      *     our connection to the HTTP server
      * @param HttpClientRequest $request
@@ -111,7 +105,7 @@ class WsTransport extends HttpTransport
      * @param HttpClientResponse $response
      *     the response containing the headers we have received
      */
-    protected function evaluateResponse(Context $context, HttpClientConnection $connection, HttpClientRequest $request, HttpClientResponse $response)
+    protected function evaluateResponse(HttpClientConnection $connection, HttpClientRequest $request, HttpClientResponse $response)
     {
         // at this point, we've had the websocket upgrade attempt back
         // the question is ... do we like what we see?
@@ -136,7 +130,7 @@ class WsTransport extends HttpTransport
             $response->addError("evaluateResponse", "No 'Upgrade' header in response");
             $response->setType(HttpClientResponse::TYPE_INVALID);
 
-            $connection->disconnect($context);
+            $connection->disconnect();
             return;
         }
         if (strcasecmp($response->headers['Upgrade'], 'websocket') !== 0)
@@ -144,7 +138,7 @@ class WsTransport extends HttpTransport
             $response->addError("evaluateResponse", "'Upgrade' header does not contain correct value");
             $response->setType(HttpClientResponse::TYPE_INVALID);
 
-            $connection->disconnect($context);
+            $connection->disconnect();
             return;
         }
 
@@ -154,7 +148,7 @@ class WsTransport extends HttpTransport
             $response->addError("evaluateResponse", "No 'Connection' header in response");
             $response->setType(HttpClientResponse::TYPE_INVALID);
 
-            $connection->disconnect($context);
+            $connection->disconnect();
             return;
         }
         if (strcasecmp($response->headers['Connection'], 'upgrade') !== 0)
@@ -162,7 +156,7 @@ class WsTransport extends HttpTransport
             $response->addError("evaluateResponse", "'Connection' header does not contain correct value");
             $response->setType(HttpClientResponse::TYPE_INVALID);
 
-            $connection->disconnect($context);
+            $connection->disconnect();
             return;
         }
 
@@ -172,7 +166,7 @@ class WsTransport extends HttpTransport
             $response->addError("evaluateResponse", "No 'Sec-WebSocket-Accept' header");
             $response->setType(HttpClientResponse::TYPE_INVALID);
 
-            $connection->disconnect($context);
+            $connection->disconnect();
             return;
         }
         $expectedKey = base64_encode(sha1($request->headers['Sec-WebSocket-Key'] . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true));
@@ -181,7 +175,7 @@ class WsTransport extends HttpTransport
             $response->addError("evaluateResponse", "'Sec-WebSocket-Accept' header does not contain correct value");
             $response->setType(HttpClientResponse::TYPE_INVALID);
 
-            $connection->disconnect($context);
+            $connection->disconnect();
             return;
         }
 
@@ -195,7 +189,7 @@ class WsTransport extends HttpTransport
                 $response->addError("evaluateResponse", "No 'Sec-WebSocket-Extensions' header");
                 $response->setType(HttpClientResponse::TYPE_INVALID);
 
-                $connection->disconnect($context);
+                $connection->disconnect();
                 return;
             }
 
@@ -204,7 +198,7 @@ class WsTransport extends HttpTransport
                 $response->addError("evaluateResponse", "'Sec-WebSocket-Extensions' header is invalid");
                 $response->setType(HttpClientResponse::TYPE_INVALID);
 
-                $connection->disconnect($context);
+                $connection->disconnect();
                 return;
             }
         }
@@ -219,7 +213,7 @@ class WsTransport extends HttpTransport
                 $response->addError("evaluateResponse", "No 'Sec-WebSocket-Protocol' header");
                 $response->setType(HttpClientResponse::TYPE_INVALID);
 
-                $connection->disconnect($context);
+                $connection->disconnect();
                 return;
             }
 
@@ -228,7 +222,7 @@ class WsTransport extends HttpTransport
                 $response->addError("evaluateResponse", "'Sec-WebSocket-Protocol' header is invalid");
                 $response->setType(HttpClientResponse::TYPE_INVALID);
 
-                $connection->disconnect($context);
+                $connection->disconnect();
                 return;
             }
         }
@@ -289,12 +283,11 @@ class WsTransport extends HttpTransport
      * Each transport mechanism needs to provide its own readContent() that
      * copes with whatever perculiarities abound
      *
-     * @param Context $context the global state that we're allowed to use
      * @param HttpClientConnection $connection our connection to the HTTP server
      * @param HttpClientResponse $response where we put the results
      * @return mixed null on error, otherwise the size of the content read
      */
-    public function readContent(Context $context, HttpClientConnection $connection, HttpClientResponse $response)
+    public function readContent(HttpClientConnection $connection, HttpClientResponse $response)
     {
         // var_dump('>> READING FRAME');
 
@@ -372,7 +365,7 @@ class WsTransport extends HttpTransport
             {
                 // invalid frame
                 $response->addError("readContent", "non-zero RSV bits received");
-                $this->sendCloseFrame($context, $connection, '');
+                $this->sendCloseFrame($connection, '');
                 $failed = true;
             }
 
@@ -388,7 +381,7 @@ class WsTransport extends HttpTransport
                         if (!$continuation)
                         {
                             $response->addError("readContent", "unexpected continuation frame received");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                             $lastDataOpcode = false;
                         }
@@ -416,7 +409,7 @@ class WsTransport extends HttpTransport
                         if ($continuation)
                         {
                             $response->addError("readContent", "TEXT frame received when continuation frame expected");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                         }
                         else
@@ -445,7 +438,7 @@ class WsTransport extends HttpTransport
                         if ($continuation)
                         {
                             $response->addError("readContent", "BINARY frame received when continuation frame expected");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                         }
                         else
@@ -476,19 +469,19 @@ class WsTransport extends HttpTransport
                         {
                             // invalid control frame!!
                             $response->addError("readContent", "PING frame received with payload too large");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                         }
                         else if (!$frame->isFin())
                         {
                             // invalid control frame!!
                             $response->addError("readContent", "PING frame received with FIN bit not set");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                         }
                         else
                         {
-                            $this->sendPongFrame($context, $connection, $frame->getApplicationData());
+                            $this->sendPongFrame($connection, $frame->getApplicationData());
                         }
                         break;
 
@@ -498,7 +491,7 @@ class WsTransport extends HttpTransport
                         {
                             // invalid control frame!!
                             $response->addError("readContent", "PONG frame received with payload too large");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                         }
                         // no action needed
@@ -510,21 +503,21 @@ class WsTransport extends HttpTransport
                         {
                             // invalid control frame!!
                             $response->addError("readContent", "CLOSE frame received with payload too large");
-                            $this->sendCloseFrame($context, $connection, '');
+                            $this->sendCloseFrame($connection, '');
                             $failed = true;
                         }
                         else
                         {
-                            $this->sendCloseFrame($context, $connection, $frame->getApplicationData());
+                            $this->sendCloseFrame($connection, $frame->getApplicationData());
                         }
-                        $connection->waitForServerClose($context);
-                        $connection->disconnect($context);
+                        $connection->waitForServerClose();
+                        $connection->disconnect();
                         $done = true;
                         break;
 
                     default:
                         // oh dear :(
-                        $this->sendCloseFrame($context, $connection, '');
+                        $this->sendCloseFrame($connection, '');
                         $failed = true;
                 }
 
@@ -539,7 +532,7 @@ class WsTransport extends HttpTransport
                         // not a valid payload - not valid UTF8
                         $response->addError("readContent", "TEXT sequence contains invalid UTF-8 at frame " . count($response->frames));
                         $failed = true;
-                        $this->sendCloseFrame($context, $connection, '');
+                        $this->sendCloseFrame($connection, '');
                     }
                 }
             }
@@ -568,20 +561,20 @@ class WsTransport extends HttpTransport
         else
         {
             $response->frames = array();
-            $connection->disconnect($context);
+            $connection->disconnect();
         }
 
         // does the connection need to close?
         if ($response->connectionMustClose())
         {
-            $connection->disconnect($context);
+            $connection->disconnect();
         }
 
         // all done
         return strlen($payloadToDate);
     }
 
-    public function sendCloseFrame(Context $context, HttpClientConnection $connection, $appData)
+    public function sendCloseFrame(HttpClientConnection $connection, $appData)
     {
         $frame = new WsFrame();
         $frame->initAsCloseFrame()
@@ -591,7 +584,7 @@ class WsTransport extends HttpTransport
         $connection->send((string)$frame);
     }
 
-    public function sendPongFrame(Context $context, HttpClientConnection $connection, $appData)
+    public function sendPongFrame(HttpClientConnection $connection, $appData)
     {
         $frame = new WsFrame();
         $frame->initAsPongFrame()

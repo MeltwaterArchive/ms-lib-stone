@@ -218,4 +218,16 @@ class BaseObject extends stdClass
         // return the array that we've built
         return $return;
     }
+
+    /**
+     * magic method, called when there's an attempt to get a property
+     * that doesn't actually exist
+     *
+     * @param  string $property name of the property being read
+     * @return null
+     */
+    public function __get($property)
+    {
+        return null;
+    }
 }

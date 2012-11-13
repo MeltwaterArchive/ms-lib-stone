@@ -20,9 +20,6 @@
 
 namespace DataSift\Stone\HttpLib;
 
-use DataSift\Stone\ContextLib\Context;
-use DataSift\Stone\ContextLib\StatsContext;
-
 use DataSift\Stone\HttpLib\Transports\HttpDefaultTransport;
 use DataSift\Stone\HttpLib\Transports\HttpChunkedTransport;
 use DataSift\Stone\HttpLib\Transports\WsTransport;
@@ -54,6 +51,13 @@ class HttpClient
     protected $transport  = null;
 
     /**
+     * A statsd client to log timing data to
+     *
+     * @var object
+     */
+    protected $statsdClient = null;
+
+    /**
      * Make a request to the HTTP server
      *
      *
@@ -62,10 +66,10 @@ class HttpClient
      * @param HttpClientRequest $request
      * @return type
      */
-    public function newRequest(Context $context, HttpClientRequest $request)
+    public function newRequest(HttpClientRequest $request)
     {
         $method = 'new' . ucfirst($request->getHttpVerb()) . 'Request';
-        return call_user_func_array(array($this, $method), array($context, $request));
+        return call_user_func_array(array($this, $method), array($request));
     }
 
     // =========================================================================
@@ -83,12 +87,12 @@ class HttpClient
      * @param HttpClientRequest $request the request to make
      * @return HttpClientResponse what we got back from the HTTP server
      */
-    public function newGetRequest(Context $context, HttpClientRequest $request)
+    public function newGetRequest(HttpClientRequest $request)
     {
         // var_dump('>> GET ' . (string)$request->getAddress());
         // can we connect to the remote server?
         $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($context, $request->getAddress(), 5))
+        if (!$this->connection->connect($request->getAddress(), 5))
         {
             // could not connect
             return false;
@@ -105,10 +109,10 @@ class HttpClient
         }
 
         // now, send the GET request
-        $this->transport->sendGet($context, $this->connection, $request);
+        $this->transport->sendGet($this->connection, $request);
 
         // listen for an answer
-        $response = $this->transport->readResponse($context, $this->connection, $request);
+        $response = $this->transport->readResponse($this->connection, $request);
 
         // at this point, we have read all of the headers sent back to us
         //
@@ -121,7 +125,7 @@ class HttpClient
         // now, do we have any valid content to read?
         if ($response->type && !$response->hasErrors())
         {
-            $this->transport->readContent($context, $this->connection, $response);
+            $this->transport->readContent($this->connection, $response);
         }
 
         // return the results
@@ -137,11 +141,11 @@ class HttpClient
      * @param HttpClientRequest $request the request to make
      * @return HttpClientResponse what we got back from the HTTP server
      */
-    public function newPostRequest(Context $context, HttpClientRequest $request)
+    public function newPostRequest(HttpClientRequest $request)
     {
         // can we connect to the remote server?
         $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($context, $request->getAddress(), 5))
+        if (!$this->connection->connect($request->getAddress(), 5))
         {
             // could not connect
             return false;
@@ -158,10 +162,10 @@ class HttpClient
         }
 
         // now, send the POST request
-        $this->transport->sendPost($context, $this->connection, $request);
+        $this->transport->sendPost($this->connection, $request);
 
         // listen for an answer
-        $response = $this->transport->readResponse($context, $this->connection, $request);
+        $response = $this->transport->readResponse($this->connection, $request);
 
         // at this point, we have read all of the headers sent back to us
         //
@@ -174,7 +178,7 @@ class HttpClient
         // now, do we have any valid content to read?
         if ($response->type && !$response->hasErrors())
         {
-            $this->transport->readContent($context, $this->connection, $response);
+            $this->transport->readContent($this->connection, $response);
         }
 
         // return the results
@@ -188,7 +192,7 @@ class HttpClient
      * @return boolean false if there was no more data, true otherwise
      */
 
-    public function readContent(Context $context, HttpClientResponse $response)
+    public function readContent(HttpClientResponse $response)
     {
         // do we have an open connection?
         if (!isset($this->connection))
@@ -203,18 +207,16 @@ class HttpClient
 
         // if we get here, we are connected
         $response->resetForNextResponse();
-        return $this->transport->readContent($context, $this->connection, $response);
+        return $this->transport->readContent($this->connection, $response);
     }
 
     /**
      * Send data to an existing HTTP connection
      *
-     * @param Context $context
-     *      The only global state that we're allowed to reuse
      * @param string $data
      *      The data to send
      */
-    public function sendData(Context $context, $data)
+    public function sendData($data)
     {
         // do we have an open connection?
         if (!isset($this->connection))
@@ -258,12 +260,12 @@ class HttpClient
      *
      * @param Context $context
      */
-    public function disconnect(Context $context)
+    public function disconnect()
     {
         if ($this->connection->isConnected())
         {
-            $this->transport->close($context, $this->connection);
-            $this->connection->disconnect($context);
+            $this->transport->close($this->connection);
+            $this->connection->disconnect();
         }
     }
 

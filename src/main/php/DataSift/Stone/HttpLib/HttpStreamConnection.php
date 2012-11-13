@@ -21,7 +21,6 @@
 namespace DataSift\Stone\HttpLib;
 
 use Exception;
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\HttpLib\Transports\HttpTransport;
 
@@ -58,7 +57,7 @@ class HttpStreamConnection extends HttpClientConnection
      * @param int $timeout
      * @return boolean did we successfully connect?
      */
-    public function connect(Context $context, HttpAddress $address)
+    public function connect(HttpAddress $address)
     {
         // timers!
         //var_dump('>> CONNECTING');
@@ -108,7 +107,7 @@ class HttpStreamConnection extends HttpClientConnection
         return true;
     }
 
-    public function waitForServerClose(Context $context)
+    public function waitForServerClose()
     {
         if (!$this->isConnected())
         {
@@ -121,7 +120,7 @@ class HttpStreamConnection extends HttpClientConnection
     /**
      * Disconnect from the HTTP server
      */
-    public function disconnect(Context $context)
+    public function disconnect()
     {
         if (!$this->isConnected())
         {

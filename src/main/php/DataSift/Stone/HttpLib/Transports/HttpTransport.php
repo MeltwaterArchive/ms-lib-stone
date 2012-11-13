@@ -21,12 +21,10 @@
 namespace DataSift\Stone\HttpLib\Transports;
 
 use Exception;
-use DataSift\Stone\ContextLib\Context;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\HttpLib\HttpClientConnection;
 use DataSift\Stone\HttpLib\HttpClientRequest;
 use DataSift\Stone\HttpLib\HttpClientResponse;
-use DataSift\Stone\StatsLib\StatsdClient;
 
 /**
  * Base class for supporting all of the different connection types to a HTTP
@@ -51,8 +49,6 @@ abstract class HttpTransport
      *
      * Override this for more exotic transports, such as web sockets
      *
-     * @param Context $context
-     *     the global state that we're allowed to use
      * @param HttpClientConnection $connection
      *     our network connection to the HTTP server
      * @param HttpClientRequest $request
@@ -61,10 +57,10 @@ abstract class HttpTransport
      *     HttpClientResponse on success,
      *     false if the connection was not open
      */
-    public function sendGet(Context $context, HttpClientConnection $connection, HttpClientRequest $request)
+    public function sendGet(HttpClientConnection $connection, HttpClientRequest $request)
     {
         // log how many GET requests we have made
-        $context->stats->increment('request.verb.get');
+        // $context->stats->increment('request.verb.get');
 
         // cannot send if we do not have an open socket
         if (!$connection->isConnected())
@@ -73,7 +69,7 @@ abstract class HttpTransport
         }
 
         // how quickly did we get the chance to send the first line off?
-        $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
+        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
 
         // send the request
         //var_dump('>> SENDING');
@@ -81,7 +77,7 @@ abstract class HttpTransport
 
         // send any supporting headers
 
-        $this->addAdditionalHeadersToRequest($context, $request);
+        $this->addAdditionalHeadersToRequest($request);
         $headers = $request->getHeadersString();
         if ($headers !== null)
         {
@@ -93,7 +89,7 @@ abstract class HttpTransport
         //var_dump('>> SENT');
 
         // how long did that take?
-        $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
+        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
     }
 
     /**
@@ -101,8 +97,6 @@ abstract class HttpTransport
      *
      * Override this for more exotic transports, such as web sockets
      *
-     * @param Context $context
-     *     the global state that we're allowed to use
      * @param HttpClientConnection $connection
      *     our network connection to the HTTP server
      * @param HttpClientRequest $request
@@ -111,10 +105,10 @@ abstract class HttpTransport
      *     HttpClientResponse on success,
      *     false if the connection was not open
      */
-    public function sendPost(Context $context, HttpClientConnection $connection, HttpClientRequest $request)
+    public function sendPost(HttpClientConnection $connection, HttpClientRequest $request)
     {
         // log how many GET requests we have made
-        $context->stats->increment('request.verb.get');
+        // $context->stats->increment('request.verb.get');
 
         // cannot send if we do not have an open socket
         if (!$connection->isConnected())
@@ -123,7 +117,7 @@ abstract class HttpTransport
         }
 
         // how quickly did we get the chance to send the first line off?
-        $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
+        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
 
         // send the request
         //var_dump('>> SENDING');
@@ -148,7 +142,7 @@ abstract class HttpTransport
         $connection->send($encodedData . self::CRLF);
 
         // how long did that take?
-        $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
+        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
     }
 
     /**
@@ -163,7 +157,7 @@ abstract class HttpTransport
      *     the request that the user wants to send
      *     we add any additional headers to the request object
      */
-    protected function addAdditionalHeadersToRequest(Context $context, HttpClientRequest $request)
+    protected function addAdditionalHeadersToRequest(HttpClientRequest $request)
     {
         // do nothing by default
     }
@@ -171,28 +165,27 @@ abstract class HttpTransport
     /**
      * Read the response line + response headers from the HTTP connection
      *
-     * @param Context $context the global state that we are allowed to use
      * @param HttpClientConnection $connection our connection to the HTTP server
      * @param HttpClientRequest $request the request that we want a response to
      * @return HttpClientResponse the response we received
      */
-    public function readResponse(Context $context, HttpClientConnection $connection, HttpClientRequest $request)
+    public function readResponse(HttpClientConnection $connection, HttpClientRequest $request)
     {
         // now, we need to see what the server said
         $response = new HttpClientResponse($connection);
-        $statusCode = $this->readResponseLine($context, $connection, $response);
+        $statusCode = $this->readResponseLine($connection, $response);
 
         // do we think it is safe to read the response headers?
         if (!$response->hasErrors())
         {
             // yes - let's go get them
-            $this->readHeaders($context, $connection, $response);
+            $this->readHeaders($connection, $response);
         }
 
         // what do we think of the response?
         //
         // this hook is here for the more exotic transports
-        $this->evaluateResponse($context, $connection, $request, $response);
+        $this->evaluateResponse($connection, $request, $response);
 
         // all done, for better or for worse
         return $response;
@@ -202,12 +195,11 @@ abstract class HttpTransport
      * Read the very first line back that we get back from the HTTP server
      * after making a request
      *
-     * @param Context $context the global state we're allowed to reuse
      * @param resource $socket the network socket to the remote server
      * @param HttpClientResponse $response
      * @return type
      */
-    protected function readResponseLine(Context $context, HttpClientConnection $connection, HttpClientResponse $response)
+    protected function readResponseLine(HttpClientConnection $connection, HttpClientResponse $response)
     {
         // make sure the socket is valid
         if (!$connection->isConnected())
@@ -223,13 +215,13 @@ abstract class HttpTransport
         $statusLine = substr($statusLine, 0, -2);
 
         // how long did it take to get the first response?
-        $context->stats->timing('response.firstLineTime', microtime(true) - $connection->connectStart);
+        // $context->stats->timing('response.firstLineTime', microtime(true) - $connection->connectStart);
 
         // decode the statusLine
         $response->decodeStatusLine($statusLine);
 
         // what response code did we get?
-        $context->stats->increment('response.status.' . $response->statusCode);
+        // $context->stats->increment('response.status.' . $response->statusCode);
 
         // all done
         return $response->statusCode;
@@ -238,11 +230,10 @@ abstract class HttpTransport
     /**
      * Read the headers from the remote server
      *
-     * @param Context $context the global state that we're allowed to reuse
      * @param HttpClientConnection $connection the network connection to the HTTP server
      * @param HttpClientResponse $response
      */
-    protected function readHeaders(Context $context, HttpClientConnection $connection, HttpClientResponse $response)
+    protected function readHeaders(HttpClientConnection $connection, HttpClientResponse $response)
     {
         // make sure the socket is valid
         if (!$connection->isConnected())
@@ -278,12 +269,11 @@ abstract class HttpTransport
      * Each transport mechanism needs to provide its own readContent() that
      * copes with whatever perculiarities abound
      *
-     * @param Context $context the global state that we're allowed to use
      * @param HttpClientConnection $connection our connection to the HTTP server
      * @param HttpClientResponse $response where we put the results
      * @return mixed null on error, otherwise the size of the content read
      */
-    abstract public function readContent(Context $context, HttpClientConnection $connection, HttpClientResponse $response);
+    abstract public function readContent(HttpClientConnection $connection, HttpClientResponse $response);
 
     /**
      * Work out whether we like the response or not
@@ -293,8 +283,6 @@ abstract class HttpTransport
      *
      * Exotic transports (such as websockets) should override this
      *
-     * @param Context $context
-     *     the *only* global state that we're allowed to use
      * @param HttpClientConnection $connection
      *     our connection to the HTTP server
      * @param HttpClientRequest $request
@@ -302,12 +290,12 @@ abstract class HttpTransport
      * @param HttpClientResponse $response
      *     the response containing the headers we have received
      */
-    protected function evaluateResponse(Context $context, HttpClientConnection $connection, HttpClientRequest $request, HttpClientResponse $response)
+    protected function evaluateResponse(HttpClientConnection $connection, HttpClientRequest $request, HttpClientResponse $response)
     {
         // do nothing by default :)
     }
 
-    public function close(Context $context, HttpClientConnection $connection)
+    public function close(HttpClientConnection $connection)
     {
         // do nothing by default
     }
