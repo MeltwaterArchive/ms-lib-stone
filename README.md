@@ -4,10 +4,10 @@ _Stone_ is a lightweight, fast and modular PHP library. It's great for making we
 
 ## Installation
 
-{% highlight bash %}
+``` bash
 git clone git@github.com:datasift/ms-lib-stone.git
 cd ms-lib-stone
 bash ./dev-setup.sh
-{% endhighlight %}
+```
 
 This will install _Stone_ into _/usr/share/php/DataSift/Stone_ as a symlink.
