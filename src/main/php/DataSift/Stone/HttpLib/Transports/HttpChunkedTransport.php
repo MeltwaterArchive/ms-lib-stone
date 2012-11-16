@@ -89,7 +89,7 @@ class HttpChunkedTransport extends HttpTransport
         // does the connection need to close?
         if ($response->connectionMustClose())
         {
-            $connection->disconnect($context);
+            $connection->disconnect();
         }
 
         // all done
