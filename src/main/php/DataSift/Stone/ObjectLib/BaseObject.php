@@ -43,6 +43,95 @@ use stdClass;
 class BaseObject extends stdClass
 {
     /**
+     * Copy all of the properties from another object (loaded from a
+     * .json file or received over the net) into our own properties
+     *
+     * By default, we convert any objects nested inside the other object
+     * into JsonObjects too, so that all the helpers defined in BaseObject
+     * are available.
+     *
+     * @param  mixed $json the object to copy
+     * @return void
+     */
+    public function mergeFromObject($src, $deep = true)
+    {
+        // special case - do we have a basic value?
+        if (!is_object($src) && !is_array($src))
+        {
+            $this->value = $src;
+            return;
+        }
+
+        // take advantage of PHP's ability to iterate over an object
+        // and its properties
+        foreach ($src as $key => $value)
+        {
+            if ($deep && is_object($value) && !($value instanceof JsonObject))
+            {
+                $this->$key = $this->convertObject($value);
+            }
+            else if ($deep && is_array($value))
+            {
+                $this->$key = $this->convertArray($value);
+            }
+            else
+            {
+                $this->$key = $value;
+            }
+        }
+    }
+
+    private function convertObject($src)
+    {
+        $return = new BaseObject();
+        $return->mergeFromObject($src);
+
+        return $return;
+    }
+
+    private function convertArray($src)
+    {
+        $mustConvert = false;
+
+        // special case - do we actually need to do any conversion?
+        $keys = array_keys($src);
+        foreach ($keys as $key)
+        {
+            if (is_object($src[$key]) || is_array($src[$key]))
+            {
+                $mustConvert = true;
+                break;
+            }
+        }
+
+        // can we just send back what we have received?
+        if (!$mustConvert)
+        {
+            // yes :)
+            return $src;
+        }
+
+        $return = array();
+        foreach ($src as $key => $value)
+        {
+            if (is_object($value))
+            {
+                $return[$key] = $this->convertObject($value);
+            }
+            else if (is_array($value))
+            {
+                $return[$key] = $this->convertArray($value);
+            }
+            else
+            {
+                $return[$key] = $value;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Do we have a named property set to non-null?
      *
      * @param  string $propName
