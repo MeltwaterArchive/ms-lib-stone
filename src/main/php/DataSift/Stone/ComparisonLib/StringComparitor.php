@@ -136,6 +136,32 @@ class StringComparitor extends ComparitorBase
 
 	}
 
+	public function isHash()
+	{
+		// do we have a non-empty string to start off with?
+		$result = $this->isNotEmpty();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// let's make sure it is a hash
+		$match = preg_match("/^[A-Za-z0-9]+$/", $this->value);
+		if (!$match) {
+			$result->setHasFailed("valid hex string", $this->value);
+			return $result;
+		}
+
+		// let's make sure it's the right length
+		$length = strlen($this->value);
+		if ($length % 2 != 0) {
+			$result->setHasFailed("valid hex string of even length", "string '{$this->value}' has odd length '{$length}'");
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
 	/**
 	 * does our string contain valid JSON?
 	 *
