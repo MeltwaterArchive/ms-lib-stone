@@ -172,7 +172,7 @@ abstract class ComparitorBase
 	public function doesNotEqual($expected)
 	{
 		// are the two values equal?
-		$result = $this->isEqual($expected);
+		$result = $this->equals($expected);
 
 		// negate the result
 		if ($result->hasPassed()) {
