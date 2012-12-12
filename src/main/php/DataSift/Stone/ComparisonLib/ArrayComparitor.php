@@ -89,54 +89,6 @@ class ArrayComparitor extends ComparitorBase
 	// ------------------------------------------------------------------
 
 	/**
-	 * does this array contain the given key?
-	 *
-	 * @param  mixed $key the key to test for
-	 * @return ComparisonResult
-	 */
-	public function containsKey($key)
-	{
-		// do we have a valid array to test?
-		$result = $this->isExpectedType();
-		if ($result->hasFailed()) {
-			return $result;
-		}
-
-		// is the key present?
-		if (!array_key_exists($key, $this->value)) {
-			$result->setHasFailed("key '{$key}' set", "key does not exist");
-			return $result;
-		}
-
-		// success
-		return $result;
-	}
-
-	/**
-	 * is the given key NOT in our array?
-	 *
-	 * @param  mixed $key the key to search for
-	 * @return ComparisonResult
-	 */
-	public function doesNotContainKey($key)
-	{
-		// do we have a valid array to test?
-		$result = $this->isExpectedType();
-		if ($result->hasFailed()) {
-			return $result;
-		}
-
-		// is the key present?
-		if (array_key_exists($key, $this->value)) {
-			$result->setHasFailed("key not set", "key '{$key}' is set");
-			return $result;
-		}
-
-		// success
-		return $result;
-	}
-
-	/**
 	 * does this array contain the given value?
 	 *
 	 * @param  mixed $value the value to test for
@@ -177,6 +129,54 @@ class ArrayComparitor extends ComparitorBase
 		// is the value present?
 		if (in_array($value, $this->value)) {
 			$result->setHasFailed("value not found", $value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
+	 * does this array contain the given key?
+	 *
+	 * @param  mixed $key the key to test for
+	 * @return ComparisonResult
+	 */
+	public function hasKey($key)
+	{
+		// do we have a valid array to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is the key present?
+		if (!array_key_exists($key, $this->value)) {
+			$result->setHasFailed("key '{$key}' set", "key does not exist");
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
+	 * is the given key NOT in our array?
+	 *
+	 * @param  mixed $key the key to search for
+	 * @return ComparisonResult
+	 */
+	public function doesNotHaveKey($key)
+	{
+		// do we have a valid array to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is the key present?
+		if (array_key_exists($key, $this->value)) {
+			$result->setHasFailed("key not set", "key '{$key}' is set");
 			return $result;
 		}
 
