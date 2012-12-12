@@ -220,4 +220,42 @@ class ArrayComparitor extends ComparitorBase
 	{
 		return $this->isExpectedType();
 	}
+
+	/**
+	 * is our array the same length as another array?
+	 *
+	 * @param  array $expected
+	 *         the array to compare against
+	 * @return ComparisonResult
+	 */
+	public function isSameLengthAs($expected)
+	{
+		// are we looking at an array?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// are we comparing against an array?
+		if (!is_array($expected)) {
+			$type = gettype($expected);
+			$result->setHasFailed("\$expected is an array", "\$expected is a '{$type}'");
+			return $result;
+		}
+
+		// how long is our array?
+		$actualLen = count($this->value);
+
+		// how long is it supposed to be?
+		$expectedLen = count($expected);
+
+		// are they the same?
+		if ($expectedLen != $actualLen) {
+			$result->setHasFailed("length is '{$expectedLen}'", "length is '{$actualLen}'");
+			return $result;
+		}
+
+		// success!
+		return $result;
+	}
 }
