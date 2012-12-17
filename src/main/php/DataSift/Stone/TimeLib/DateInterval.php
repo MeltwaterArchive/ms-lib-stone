@@ -47,6 +47,7 @@ class DateInterval extends \DateInterval
                ($this->m * 30 * 24 * 60 * 60) +
                ($this->d * 24 * 60 * 60) +
                ($this->h * 60 *60) +
+               ($this->i * 60) +
                 $this->s;
 	}
 }
