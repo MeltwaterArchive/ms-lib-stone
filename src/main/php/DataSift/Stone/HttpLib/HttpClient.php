@@ -273,4 +273,9 @@ class HttpClient
     {
         return $this->connection->getSocket();
     }
+
+    public function isSocketConnected()
+    {
+        return !!$this->getSocket();
+    }
 }
