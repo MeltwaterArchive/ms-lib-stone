@@ -105,7 +105,8 @@ class HttpStreamConsumer
             if (count($readArray) == 0)
             {
                 // var_dump('>> READARRAY is 0');
-                exit(0);
+                // We don't have anything to process, dive out
+                return;
             }
 
             $sockets = $readArray;
