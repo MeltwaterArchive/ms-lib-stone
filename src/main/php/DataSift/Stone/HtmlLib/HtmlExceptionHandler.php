@@ -66,7 +66,7 @@ class HtmlExceptionHandler
         }
 
         // now make sure we load the '500' page
-        require APP_DIR . '/500.php';
+        require APP_DIR . 'controllers/Error500.php';
         exit(0);
     }
 }
