@@ -69,6 +69,20 @@ class HttpData
     }
 
     /**
+     * add additional data (for example, parsed out of a route) to the
+     * list of unchecked variables
+     *
+     * @param string $key
+     *        the name of the variable to set
+     * @param string $value
+     *        the value to set the variable to
+     */
+    public function addData($key, $value)
+    {
+        $this->unchecked[$key] = $value;
+    }
+
+    /**
      * Does the wrapped data contain the given key?
      *
      * @param  string  $key the key to test
