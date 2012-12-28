@@ -45,6 +45,11 @@ class Routes
 	const METHOD_PUT  	= "PUT";
 	const METHOD_DELETE = "DELETE";
 
+	public function __construct($routes = array())
+	{
+		$this->routes = $routes;
+	}
+
 	/**
 	 * add an additional route to our list of known routes
 	 *
@@ -57,13 +62,31 @@ class Routes
 	 */
 	public function addRoute($verb, $pattern, $controller)
 	{
-		$this->routes[] = array (
-			'verb'       => $verb,
+		if (!isset($this->routes[$verb])) {
+			$this->routes[$verb] = array();
+		}
+
+		$this->routes[$verb][] = array (
 			'pattern'    => $pattern,
 			'controller' => $controller
 		);
 	}
 
+	public function getRoutes()
+	{
+		return $this->routes;
+	}
+
+	public function getRoutesForVerb($verb)
+	{
+		// do we have any matching routes?
+		if (isset($this->routes[$verb])) {
+			return $this->routes[$verb];
+		}
+
+		// no routes
+		return array();
+	}
 	/**
 	 * set the list of routes, replacing any existing routes in our list
 	 *

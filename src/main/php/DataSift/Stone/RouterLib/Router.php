@@ -20,6 +20,8 @@
 
 namespace DataSift\Stone\RouterLib;
 
+use DataSift\Stone\HtmlLib\FormData;
+use DataSift\Stone\HttpLib\HttpData;
 use DataSift\Stone\LogLib\Log;
 
 /**
@@ -38,38 +40,71 @@ class Router
 
     public function __construct($basedir)
     {
-        $this->appDir = realpath($basedir);
+        $this->appDir = $basedir;
     }
 
-    public function determineScriptForRequest()
+    public function determineScriptForRequest(Routes $routes, HttpData $get, FormData $_POST)
     {
         // what is the current HTML verb?
         $verb = basename($_SERVER['REQUEST_METHOD']);
 
+        // what are the possible routes to examine?
+        $routesToCheck = $routes->getRoutesForVerb($verb);
+
         // what page did the customer try to access?
-        $script = dirname($_SERVER['SCRIPT_NAME']);
-        if ($script !== '/')
-        {
-            $script .= '/';
-        }
-        $script .= basename($_SERVER['SCRIPT_NAME'], '.php');
+        $requestUri = $_SERVER['REQUEST_URI'];
 
         // note what is happening
-        Log::write(Log::LOG_DEBUG, "Received " . $verb. " request for " . $script);
+        Log::write(Log::LOG_DEBUG, "Received " . $verb. " request for " . $requestUri);
 
-        // delegate this work to a specialised helper method
-        $delegate = 'determineScriptFor' . ucfirst($verb) . 'Request';
-        $requireFile = $this->$delegate($script);
-
-        // does the file exist?
-        if (!file_exists($requireFile))
+        // find the controller to call
+        foreach ($routesToCheck as $routeToCheck)
         {
-            Log::write(Log::LOG_WARNING, "Missing front-end controller: " . $requireFile);
-            $requireFile = $this->appDir . '/404.php';
+            $matches = array();
+            $pattern = '|^' . $routeToCheck['pattern'] . '$|';
+
+            Log::write(Log::LOG_DEBUG, "Checking against route '{$pattern}'");
+
+            if (!preg_match($pattern, $requestUri, $matches)) {
+                // no match
+                continue;
+            }
+
+            // if we get here, then we have found our route
+            //
+            // but does it exist?
+            $requireFile = $this->appDir . '/controllers/' . $routeToCheck['controller'];
+
+            // does the file exist?
+            if (!file_exists($requireFile))
+            {
+                Log::write(Log::LOG_WARNING, "Missing front-end controller: " . $requireFile);
+                $requireFile = $this->appDir . '/controllers/Error500.php';
+            }
+
+            // we need to add any matched URI parameters into our
+            // data
+            if ($verb == Routes::METHOD_GET) {
+                foreach ($matches as $key => $value) {
+                    $get->addData($key, $value);
+                }
+            }
+            else if ($verb == Routes::METHOD_POST) {
+                foreach ($matches as $key => $value) {
+                    $post->addData($key, $value);
+                }
+            }
+
+            // return the file we've decided on
+            Log::write(Log::LOG_DEBUG, "Routing to script: " . $requireFile);
+            return $requireFile;
         }
 
-        // return the file we've decided on
-        Log::write(Log::LOG_DEBUG, "Routing to script: " . $requireFile);
+        // if we get here, then there's no matching route
+        Log::write(Log::LOG_WARNING, "No matching route for request '{$requestUri}'");
+        $requireFile = $this->appDir . '/controllers/Error404.php';
+
+        // return the controller to run
         return $requireFile;
     }
 
