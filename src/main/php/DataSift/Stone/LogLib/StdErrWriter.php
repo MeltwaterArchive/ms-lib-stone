@@ -32,7 +32,7 @@ namespace DataSift\Stone\LogLib;
 
 use Exception;
 
-class LogStdErr extends BaseLogger
+class StdErrWriter extends BaseLogger
 {
     protected $fp;
 

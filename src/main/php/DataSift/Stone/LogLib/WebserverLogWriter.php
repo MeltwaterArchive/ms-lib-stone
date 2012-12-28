@@ -30,7 +30,7 @@
 
 namespace DataSift\Stone\LogLib;
 
-class LogWebserverLog extends BaseLogger
+class WebserverLogWriter extends BaseLogger
 {
     protected $prefixes = array (
         Log::LOG_EMERGENCY => "1: EMERGENCY: ",
