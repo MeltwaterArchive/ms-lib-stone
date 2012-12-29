@@ -71,11 +71,13 @@ class Log
      *         what kind of message is this? (one of the LOG_* constants)
      * @param  string $errMessage
      *         the text to log
+     * @param  array $context
+     *         key/value pairs to substitute in the log message
      * @param  Exception $cause
      *         the underlying cause / exception that caused this log event
      * @return void
      */
-    static public function write($logLevel, $errMessage = null, $cause = null)
+    static public function write($logLevel, $errMessage = null, $context = array(), $cause = null)
     {
         // do we really want to log this?
         if (!isset(self::$mask[$logLevel]) || !self::$mask[$logLevel])
@@ -85,6 +87,14 @@ class Log
         }
 
         // yes we do
+        //
+        // expand the message to include the context details
+        foreach ($context as $key => $value)
+        {
+            $errMessage = str_replace('{' . $key . '}', $value, $errMessage);
+        }
+
+        // send the final message to the log writer
         self::$writer->write($logLevel, $errMessage, $cause);
     }
 
