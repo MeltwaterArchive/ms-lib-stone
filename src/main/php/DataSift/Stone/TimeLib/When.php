@@ -20,8 +20,6 @@
 
 namespace DataSift\Stone\TimeLib;
 
-use DateTime;
-
 /**
  * Helper class for working with times
  *
@@ -32,8 +30,16 @@ use DateTime;
  * @link     http://www.mediasift.com
  */
 
-class When extends DateTime
+class When
 {
+    /**
+     * singleton - cannot construct
+     */
+    private function __construct()
+    {
+
+    }
+
     static public function age_asString($when)
     {
         $ageTime = time() - $when;
@@ -69,7 +75,6 @@ class When extends DateTime
     {
         if (count($return) && $count == 0)
         {
-            $return[] = '0 ' . $many;
             return;
         }
 
