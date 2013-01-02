@@ -4,4 +4,5 @@ dist
 nbproject
 review
 vendor
+vendor_src
 .tag*
