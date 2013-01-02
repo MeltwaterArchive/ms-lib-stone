@@ -34,10 +34,7 @@ class DateInterval extends \DateInterval
 {
 	public function getTotalMinutes()
 	{
-		// get total days
-		$days = $this->format('%a');
-
-		return ($days * 24 * 60) + ($this->h * 60) + ($this->i);
+		return ($this->d * 24 * 60) + ($this->h * 60) + ($this->i) + ($this->s / 60);
 	}
 
 	public function getTotalSeconds()
