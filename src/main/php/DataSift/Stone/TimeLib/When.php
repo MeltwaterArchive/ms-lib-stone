@@ -34,12 +34,21 @@ class When
 {
     /**
      * singleton - cannot construct
+     * @codeCoverageIgnore
      */
     private function __construct()
     {
 
     }
 
+    /**
+     * create a description of how old a timestamp is
+     *
+     * @param  int $when
+     *         the timestamp to examine
+     * @return string
+     *         a description of how old the timestamp is
+     */
     static public function age_asString($when)
     {
         $ageTime = time() - $when;
@@ -71,6 +80,20 @@ class When
         return join($return, ', ');
     }
 
+    /**
+     * helper method for expanding a single part of a date/time into a
+     * description
+     *
+     * @param  array $return
+     *         the array we add our results to
+     * @param  int $count
+     *         the number (of one of: days, hours, minutes) that we are examining
+     * @param  string $single
+     *         the correct description if $count == 1
+     * @param  string $many
+     *         the correct description if $count > 1
+     * @return void
+     */
     private static function expandTimeAge(&$return, $count, $single, $many)
     {
         if (count($return) && $count == 0)
