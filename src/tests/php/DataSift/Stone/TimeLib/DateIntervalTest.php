@@ -83,5 +83,4 @@ class DateIntervalTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals($expectedIntervals, $actualIntervals);
 	}
-
 }
