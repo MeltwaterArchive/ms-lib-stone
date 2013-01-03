@@ -40,7 +40,7 @@ class DateInterval extends \DateInterval
 	 */
 	public function getTotalMinutes()
 	{
-		return $this->getTotalSeconds() / 60;
+		return (int)($this->getTotalSeconds() / 60);
 	}
 
 	/**

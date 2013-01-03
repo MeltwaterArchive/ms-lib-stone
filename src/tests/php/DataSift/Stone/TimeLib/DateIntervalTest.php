@@ -34,7 +34,8 @@ class DateIntervalTest extends PHPUnit_Framework_TestCase
 			'P300D' => 60 * 24 * 300,
 			'PT300H' => 60 * 300,
 			'PT300M' => 300,
-			'PT360S' => 6
+			'PT360S' => 6,
+			'PT350S' => 5
 		);
 		$actualIntervals = array();
 
