@@ -1,7 +1,9 @@
 .build
 dist
+docs
 .tmp
 nbproject
 review
 vendor
+vendor_src
 .tag*

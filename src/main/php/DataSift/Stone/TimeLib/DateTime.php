@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone\TimeLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -23,10 +23,10 @@ namespace DataSift\Stone\TimeLib;
 use DateTimeZone;
 
 /**
- * Helper class for working with times
+ * Helper class for working with dates and times
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone\TimeLib
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
@@ -34,63 +34,127 @@ use DateTimeZone;
 
 class DateTime extends \DateTime
 {
-	public function __construct($startTime, $offsetString = 0, $timezone = 'UTC') {
-		// the time that we will (eventually) store
-		parent::__construct();
-		$this->setTimezone(new DateTimeZone('UTC'));
-		$this->setTimestamp($startTime);
+    /**
+     * constructor
+     *
+     * Takes an optional date/time offset to apply
+     *
+     * @param int $startTime
+     *        the UNIX timestamp to apply (default is time())
+     * @param string $offsetString
+     *        any date/time offset to apply (must be valid DateInterval string)
+     * @param string $timezone
+     *        what timezone is $startTime in (default is UTC)
+     */
+    public function __construct($startTime = null, $offsetString = "P0D", $timezone = 'UTC')
+    {
+        // call the parent constructor
+        parent::__construct();
 
-		// are we adding or subtracting?
-		$sub = false;
-		if ($offsetString{0} == '-') {
-			$sub = true;
-			$offsetString = substr($offsetString, 1);
-		}
+        // do we have a time to apply?
+        if ($startTime === null)
+        {
+            $startTime = time();
+        }
 
-		// apply the offset string
-		$interval = new DateInterval($offsetString);
-		if ($sub) {
-			$this->sub($interval);
-		} else {
-			$this->add($interval);
-		}
+        // apply the starting time
+        $this->setTimezone(new DateTimeZone($timezone));
+        $this->setTimestamp($startTime);
 
-		// all done
-	}
+        // apply the offset
+        $this->applyOffset($offsetString);
 
-	public function setOffset($offsetString)
-	{
-		// are we adding or subtracting?
-	}
+        // all done
+    }
 
-	public function getDateTime()
-	{
-		return date('Y-m-d H:i:s', $this->getTimestamp());
-	}
+    /**
+     * apply a date/time interval to this datetime
+     *
+     * @param  string $offsetString
+     *         The dateinterval format string to apply.
+     *         Can start with '-' if you want to subtract time.
+     * @return void
+     */
+    public function applyOffset($offsetString)
+    {
+        // are we adding or subtracting?
+        $sub = false;
+        if ($offsetString{0} == '-') {
+            // we are subtracting
+            $sub = true;
 
-	public function getDateTimeSinceMidnight()
-	{
-		$return = $this->getDateTime();
-		$return = substr($return, 0, 10) . " 00:00:00 " . $this->getTimezoneName();
+            // remove the '-' from the front of the string, otherwise
+            // Derick's DateTime::__construct() will complain
+            $offsetString = substr($offsetString, 1);
+        }
 
-		return $return;
-	}
+        // calculate the date/time interval
+        $interval = new DateInterval($offsetString);
 
-	public function getDate()
-	{
-		return date('Y-m-d', $this->getTimestamp());
-	}
+        // apply the offset string
+        if ($sub) {
+            $this->sub($interval);
+        } else {
+            $this->add($interval);
+        }
 
-	public function getSecondsSinceStartOfMonth()
-	{
-		$monthStart = strtotime(date('Y-m-01 00:00:00', $this->getTimestamp));
-		$now = time();
+        // all done
+    }
 
-		return $now - $monthStart;
-	}
+    /**
+     * get the date in the 'Y-m-d' format
+     *
+     * @return string
+     */
+    public function getDate()
+    {
+        return date('Y-m-d', $this->getTimestamp());
+    }
 
-	public function getTimezoneName()
-	{
-		return $this->getTimezone()->getName();
-	}
+    /**
+     * return the date/time in the common 'Y-m-d H:i:s' format
+     *
+     * @return string
+     */
+    public function getDateTime()
+    {
+        return date('Y-m-d H:i:s', $this->getTimestamp());
+    }
+
+    /**
+     * return a valid date/time string with the time set to midnight
+     *
+     * @return string
+     */
+    public function getDateTimeAtMidnight()
+    {
+        $return = $this->getDateTime();
+        $return = substr($return, 0, 10) . " 00:00:00 " . $this->getTimezoneName();
+
+        return $return;
+    }
+
+    /**
+     * returns the number of seconds from this DateTime and the start of the month
+     *
+     * @return int
+     */
+    public function getSecondsSinceStartOfMonth()
+    {
+        $monthStartString = date('Y-m-01 00:00:00', $this->getTimestamp());
+        $monthStartTime   = strtotime($monthStartString);
+        $now = $this->getTimestamp();
+
+        return $now - $monthStartTime;
+    }
+
+    /**
+     * what timezone is this DateTime in?
+     *
+     * @return string
+     */
+    public function getTimezoneName()
+    {
+        return $this->getTimezone()->getName();
+    }
 }

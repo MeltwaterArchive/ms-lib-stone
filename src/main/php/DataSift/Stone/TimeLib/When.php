@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone\TimeLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -20,20 +20,35 @@
 
 namespace DataSift\Stone\TimeLib;
 
-use DateTime;
-
 /**
- * Helper class for working with times
+ * Helper class for describing the age of a time
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone\TimeLib
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
  */
 
-class When extends DateTime
+class When
 {
+    /**
+     * singleton - cannot construct
+     * @codeCoverageIgnore
+     */
+    private function __construct()
+    {
+
+    }
+
+    /**
+     * create a description of how old a timestamp is
+     *
+     * @param  int $when
+     *         the timestamp to examine
+     * @return string
+     *         a description of how old the timestamp is
+     */
     static public function age_asString($when)
     {
         $ageTime = time() - $when;
@@ -65,11 +80,24 @@ class When extends DateTime
         return join($return, ', ');
     }
 
+    /**
+     * helper method for expanding a single part of a date/time into a
+     * description
+     *
+     * @param  array $return
+     *         the array we add our results to
+     * @param  int $count
+     *         the number (of one of: days, hours, minutes) that we are examining
+     * @param  string $single
+     *         the correct description if $count == 1
+     * @param  string $many
+     *         the correct description if $count > 1
+     * @return void
+     */
     private static function expandTimeAge(&$return, $count, $single, $many)
     {
         if (count($return) && $count == 0)
         {
-            $return[] = '0 ' . $many;
             return;
         }
 
