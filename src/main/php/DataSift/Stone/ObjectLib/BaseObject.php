@@ -313,10 +313,10 @@ class BaseObject extends stdClass
      * that doesn't actually exist
      *
      * @param  string $property name of the property being read
-     * @return null
+     * @throws \Exception
      */
     public function __get($property)
     {
-        return null;
+        throw new \Exception("Property does not exist in object: '".$property."'");
     }
 }
