@@ -33,16 +33,32 @@ namespace DataSift\Stone\ExceptionsLib;
 
 class E5xx_EngineError extends Exxx_Exception
 {
+    /**
+     * a simple table to translate PHP error constants into a
+     * human-readable string
+     *
+     * this really should be built into the PHP engine itself, but
+     * AFAIK it currently is not
+     *
+     * @var array
+     */
 	static protected $engineErrors = array(
-        E_ERROR => "E_ERROR: ",
-        E_PARSE => "E_PARSE: ",
         E_WARNING => "E_WARNING: ",
         E_NOTICE => "E_NOTICE: ",
         E_USER_ERROR => "E_USER_ERROR: ",
         E_USER_NOTICE => "E_USER_NOTICE: ",
         E_USER_WARNING => "E_USER_WARNING: ",
-        E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR: "
+        E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR: ",
+        E_DEPRECATED => "E_DEPRECATED: ",
+        E_USER_DEPRECATED => "E_USER_DEPRECATED: "
 	);
+
+    /**
+     * the PHP engine error that was passed to us
+     *
+     * @var integer
+     */
+    protected $engineError = 0;
 
     public function __construct($errstr, $errno)
     {
@@ -55,6 +71,16 @@ class E5xx_EngineError extends Exxx_Exception
     		// we do not know what this is
     		$msg = "PHP engine error #{$errno}: {$errstr}";
     	}
+
+        // remember the PHP engine error code we received
+        $this->engineError = $errno;
+
+        // call our parent's constructor
         parent::__construct(500, $msg, $msg);
+    }
+
+    public function getEngineError()
+    {
+        return $this->engineError;
     }
 }

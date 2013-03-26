@@ -47,52 +47,6 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     /**
      * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
      */
-    public function testSupportsE_Error()
-    {
-        // ----------------------------------------------------------------
-        // setup your test
-
-        $errMsg = "My error message";
-        $expectedMessage = "E_ERROR: {$errMsg}";
-
-        // ----------------------------------------------------------------
-        // perform the change
-
-        $obj = new E5xx_EngineError($errMsg, E_ERROR);
-
-        // ----------------------------------------------------------------
-        // test the results
-
-        $this->assertTrue($obj instanceof E5xx_EngineError);
-        $this->assertEquals($expectedMessage, $obj->getMessage());
-    }
-
-    /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
-     */
-    public function testSupportsE_Parse()
-    {
-        // ----------------------------------------------------------------
-        // setup your test
-
-        $errMsg = "My error message";
-        $expectedMessage = "E_PARSE: {$errMsg}";
-
-        // ----------------------------------------------------------------
-        // perform the change
-
-        $obj = new E5xx_EngineError($errMsg, E_PARSE);
-
-        // ----------------------------------------------------------------
-        // test the results
-
-        $this->assertTrue($obj instanceof E5xx_EngineError);
-        $this->assertEquals($expectedMessage, $obj->getMessage());
-    }
-
-    /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
-     */
     public function testSupportsE_Warning()
     {
         // ----------------------------------------------------------------
@@ -249,6 +203,30 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue($obj instanceof E5xx_EngineError);
         $this->assertEquals($expectedMessage, $obj->getMessage());
+    }
+
+    /**
+     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::getEngineError
+     */
+    public function testCanGetEngineErrorCode()
+    {
+        // ----------------------------------------------------------------
+        // setup your test
+
+        $errMsg = "My error message";
+        $expectedCode = E_RECOVERABLE_ERROR;
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $obj = new E5xx_EngineError($errMsg, $expectedCode);
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $this->assertTrue($obj instanceof E5xx_EngineError);
+        $actualCode = $obj->getEngineError();
+        $this->assertEquals($expectedCode, $actualCode);
     }
 
 }
