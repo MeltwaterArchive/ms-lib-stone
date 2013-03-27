@@ -20,7 +20,6 @@
 
 namespace DataSift\Stone\ConfigLib;
 
-use Exception;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\ObjectLib\BaseObject;
 
@@ -160,10 +159,21 @@ abstract class BaseConfigLoader
 
     protected function loadFileFromDefaultPaths($configName)
     {
+        // a list of everywhere that we have looked, in case we can't find
+        // the file at all
+        $searchedPaths = array();
+
         // load the first file that we find
         foreach ($this->defaultConfigFilePaths as $filename) {
+            // remember this, in case we have to throw an error
+            $searchedPaths[] = $filename;
+
+            // build up the full filename
             $filename .= $configName;
+
+            // does it exist?
             if (file_exists($filename)) {
+                // yes - LOAD IT
                 $config = $this->loadConfigFile($filename);
                 break;
             }
@@ -172,7 +182,7 @@ abstract class BaseConfigLoader
         // did we find one?
         if (!isset($config)) {
             // no, we did not
-            throw new RuntimeException("Unable to find config file called '{$configName}'");
+            throw new E5xx_ConfigFileNotFound($configName, $searchedPaths);
         }
 
         // if we get here, then we successfully loaded some config
