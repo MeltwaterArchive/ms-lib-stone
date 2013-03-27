@@ -45,10 +45,10 @@ class CheckboxWidget extends TextWidget
      *                        default is the filename for the TextWidget class
      * @return string
      */
-    public function getSnippetFileToInclude($format = 'html')
+    public function getSnippetFileToInclude($format = 'html', $file = __FILE__)
     {
         // return the full path to the snippet file for this widget
-        return parent::getSnippetFileToInclude($format, __FILE__);
+        return parent::getSnippetFileToInclude($format, $file);
     }
 
     // ==================================================================

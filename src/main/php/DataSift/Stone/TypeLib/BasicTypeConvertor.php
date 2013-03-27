@@ -18,6 +18,8 @@
  * @link      http://www.mediasift.com
  */
 
+namespace DataSift\Stone\TypeLib;
+
 /**
  * Converts PHP's basic types into other types
  *
