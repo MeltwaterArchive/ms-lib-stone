@@ -176,10 +176,10 @@ class StringComparitor extends ComparitorBase
 		}
 
 		// convert from JSON
-		$obj = @json_decode((string)$this->value);
+		$obj = json_decode((string)$this->value);
 
 		// what happened?
-		if (!is_object($obj)) {
+		if (!is_object($obj) && !(is_array($obj))) {
 			$result->setHasFailed("valid JSON string", "string failed to decode");
 			return $result;
 		}
