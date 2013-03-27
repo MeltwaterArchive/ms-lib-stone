@@ -13,7 +13,7 @@
         </blacklist>
         <whitelist addUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src/bin</directory>
-            <directory suffix=".php">src/php</directory>
+            <directory suffix=".php">src/main/php</directory>
         </whitelist>
     </filter>
     <logging>

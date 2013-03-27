@@ -18,6 +18,8 @@
  * @link      http://www.mediasift.com
  */
 
+namespace DataSift\Stone\TypeLib;
+
 /**
  * Converts one type into another
  *
@@ -27,8 +29,6 @@
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
  */
-
-namespace DataSift\Stone\TypeLib;
 
 class TypeConvertor
 {

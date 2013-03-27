@@ -18,6 +18,8 @@
  * @link      http://www.mediasift.com
  */
 
+namespace DataSift\Stone\TypeLib;
+
 /**
  * Converts objects into other types
  *
