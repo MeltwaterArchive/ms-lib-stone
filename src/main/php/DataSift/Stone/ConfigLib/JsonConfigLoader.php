@@ -25,7 +25,7 @@ use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\ObjectLib\BaseObject;
 
 /**
- * The interface all ConfigLoaders must support
+ * A simple library to load a JSON-encoded config file from disk
  *
  * @category Libraries
  * @package  Stone/ConfigLib
@@ -34,14 +34,15 @@ use DataSift\Stone\ObjectLib\BaseObject;
  * @link     http://www.mediasift.com
  */
 
-interface ConfigLoader
+class JsonConfigLoader extends BaseConfigLoader implements ConfigLoader
 {
-    /**
-     * load your app's default config file
-     *
-     * @return BaseObject
-     */
-    public function loadDefaultConfig();
-    public function loadUserConfig(BaseObject $config);
-    public function loadAdditionalConfig(BaseObject $config, $basename);
+    public function __construct($appName, $topDir)
+    {
+        parent::__construct($appName, $topDir, 'json');
+    }
+
+    protected function decodeLoadedFile($rawConfig)
+    {
+        return json_decode($rawConfig);
+    }
 }
