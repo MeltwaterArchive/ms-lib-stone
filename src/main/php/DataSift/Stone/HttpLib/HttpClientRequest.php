@@ -64,6 +64,12 @@ class HttpClientRequest
     private $headersString = null;
 
     /**
+     * the data body to include in the request
+     * @var array|string| null
+     */
+    private $body = array();
+
+    /**
      * Constructor
      *
      * We need to know the URL we are connecting to
@@ -108,6 +114,19 @@ class HttpClientRequest
         }
 
         $this->headers['Host'] = $this->address->hostname;
+    }
+
+    /**
+     * Set the HTTP verb to use with this request
+     *
+     * @param  string $verb
+     *         one of: GET, POST, PUT, DELETE
+     * @return HttpClientRequest $this
+     */
+    public function withHttpVerb($verb)
+    {
+        $this->httpVerb = $verb;
+        return $this;
     }
 
     /**
@@ -161,6 +180,26 @@ class HttpClientRequest
     }
 
     /**
+     * Do we have the named header already set?
+     *
+     * @param  string $headerName
+     *         the name of the header to check for
+     *
+     * @return boolean
+     *         TRUE if the header already exists
+     *         FALSE if it does not
+     */
+    public function hasHeaderCalled($headerName)
+    {
+        if (isset($this->headers[$headerName]))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Obtain the request line to send to the HTTP server
      *
      * @return string
@@ -183,52 +222,52 @@ class HttpClientRequest
      */
     public function asGetRequest()
     {
-        $this->httpVerb = 'GET';
-
-        return $this;
+        return $this->withHttpVerb("GET");
     }
 
 
     // =========================================================================
     //
-    // Support for POST requests
+    // Support for POST and PUT requests
     //
     // -------------------------------------------------------------------------
 
     public function asPostRequest()
     {
-        $this->httpVerb = 'POST';
-        $this->postBody = array();
-
-        return $this;
+        return $this->withHttpVerb("POST");
     }
 
-    public function addPostData($name, $value)
+    public function asPutRequest()
+    {
+        return $this->withHttpVerb("PUT");
+    }
+
+    public function addData($name, $value)
     {
         $this->postBody[$name] = $value;
     }
 
-    public function setPostPayload($payload)
+    public function setPayload($payload)
     {
-        $this->postBody = $payload;
+        $this->body = $payload;
     }
 
-    public function getPostBody()
+    public function getBody()
     {
-        if (is_array($this->postBody))
+        if (is_array($this->body))
         {
-            return $this->getEncodedPostData();
+            return $this->getEncodedBody();
         }
         else
         {
-            return $this->postBody;
+            return $this->body;
         }
     }
 
-    public function getEncodedPostData()
+    public function getEncodedBody()
     {
         $return = '';
-        foreach ($this->postBody as $key => $value)
+        foreach ($this->body as $key => $value)
         {
             if (strlen($return) > 0)
             {
@@ -238,5 +277,16 @@ class HttpClientRequest
         }
 
         return $return;
+    }
+
+    // =========================================================================
+    //
+    // Support for DELETE requests
+    //
+    // -------------------------------------------------------------------------
+
+    public function asPutRequest()
+    {
+        return $this->withHttpVerb("DELETE");
     }
 }

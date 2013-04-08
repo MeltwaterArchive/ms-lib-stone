@@ -93,7 +93,7 @@ abstract class HttpTransport
     }
 
     /**
-     * Send data to our connection as a GET request
+     * Send data to our connection as a POST request
      *
      * Override this for more exotic transports, such as web sockets
      *
@@ -123,9 +123,11 @@ abstract class HttpTransport
         //var_dump('>> SENDING');
         $connection->send($request->getRequestLine() . self::CRLF);
         $encodedData = $request->getPostBody();
-        $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
+        if (!$request->hasHeaderCalled('Content-Type'))
+        {
+            $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
         $request->withExtraHeader('Content-Length', strlen($encodedData));
-
 
         // send any supporting headers
         $this->addAdditionalHeadersToRequest($context, $request);
@@ -140,6 +142,109 @@ abstract class HttpTransport
         //var_dump('>> SENT');
 
         $connection->send($encodedData . self::CRLF);
+
+        // how long did that take?
+        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
+    }
+
+    /**
+     * Send data to our connection as a PUT request
+     *
+     * Override this for more exotic transports, such as web sockets
+     *
+     * @param HttpClientConnection $connection
+     *     our network connection to the HTTP server
+     * @param HttpClientRequest $request
+     *     the request that we are sending
+     * @return mixed
+     *     HttpClientResponse on success,
+     *     false if the connection was not open
+     */
+    public function sendPut(HttpClientConnection $connection, HttpClientRequest $request)
+    {
+        // log how many GET requests we have made
+        // $context->stats->increment('request.verb.get');
+
+        // cannot send if we do not have an open socket
+        if (!$connection->isConnected())
+        {
+            return false;
+        }
+
+        // how quickly did we get the chance to send the first line off?
+        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
+
+        // send the request
+        //var_dump('>> SENDING');
+        $connection->send($request->getRequestLine() . self::CRLF);
+        $encodedData = $request->getPostBody();
+        if (!$request->hasHeaderCalled('Content-Type'))
+        {
+            $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
+        $request->withExtraHeader('Content-Length', strlen($encodedData));
+
+        // send any supporting headers
+        $this->addAdditionalHeadersToRequest($context, $request);
+        $headers = $request->getHeadersString();
+        if ($headers !== null)
+        {
+            $connection->send($headers);
+        }
+
+        // send empty line to complete request
+        $connection->send(self::CRLF);
+        //var_dump('>> SENT');
+
+        $connection->send($encodedData . self::CRLF);
+
+        // how long did that take?
+        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
+    }
+
+    /**
+     * Send data to our connection as a DELETE request
+     *
+     * Override this for more exotic transports, such as web sockets
+     *
+     * @param HttpClientConnection $connection
+     *     our network connection to the HTTP server
+     * @param HttpClientRequest $request
+     *     the request that we are sending
+     * @return mixed
+     *     HttpClientResponse on success,
+     *     false if the connection was not open
+     */
+    public function sendGet(HttpClientConnection $connection, HttpClientRequest $request)
+    {
+        // log how many GET requests we have made
+        // $context->stats->increment('request.verb.get');
+
+        // cannot send if we do not have an open socket
+        if (!$connection->isConnected())
+        {
+            return false;
+        }
+
+        // how quickly did we get the chance to send the first line off?
+        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
+
+        // send the request
+        //var_dump('>> SENDING');
+        $connection->send($request->getRequestLine() . self::CRLF);
+
+        // send any supporting headers
+
+        $this->addAdditionalHeadersToRequest($request);
+        $headers = $request->getHeadersString();
+        if ($headers !== null)
+        {
+            $connection->send($headers);
+        }
+
+        // send empty line to complete request
+        $connection->send(self::CRLF);
+        //var_dump('>> SENT');
 
         // how long did that take?
         // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
