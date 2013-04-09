@@ -54,16 +54,24 @@ class HttpDefaultTransport extends HttpTransport
             return null;
         }
 
+        // how much content do we expect to read?
+        //
+        // this may be NULL
+        $expectedLen = $response->getExpectedContentLength();
+
         // retrieve the body
         $body = '';
         do
         {
             $body .= $connection->readLine();
+            // var_dump($body);
+
+            // keep count of how much data we've read
+            $response->bytesRead += strlen($body);
         }
-        while (!$connection->feof());
+        while (!$connection->feof() && ($expectedLen && $response->bytesRead < $expectedLen));
 
         // stash the retrieved body in the response
-        $response->bytesRead += strlen($body);
         $response->decodeBody($body);
         $chunkSize = strlen($body);
 

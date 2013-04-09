@@ -125,7 +125,10 @@ class HttpClientRequest
      */
     public function withHttpVerb($verb)
     {
-        $this->httpVerb = $verb;
+        // make sure that we store the verb in upper case
+        $this->httpVerb = strtoupper($verb);
+
+        // all done
         return $this;
     }
 
@@ -285,7 +288,7 @@ class HttpClientRequest
     //
     // -------------------------------------------------------------------------
 
-    public function asPutRequest()
+    public function asDeleteRequest()
     {
         return $this->withHttpVerb("DELETE");
     }

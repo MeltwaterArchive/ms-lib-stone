@@ -340,4 +340,20 @@ class HttpClientResponse
     {
         return (count($this->errorMsgs) > 0);
     }
+
+    public function getExpectedContentLength()
+    {
+        // do we know how long the content should be?
+        if (isset($this->headers['Content-Length'])) {
+            return $this->headers['Content-Length'];
+        }
+
+        // if we get here, we just don't know
+        return NULL;
+    }
+
+    public function getBody()
+    {
+        return $this->body;
+    }
 }

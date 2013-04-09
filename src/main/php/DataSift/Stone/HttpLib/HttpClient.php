@@ -68,7 +68,7 @@ class HttpClient
      */
     public function newRequest(HttpClientRequest $request)
     {
-        $method = 'new' . ucfirst($request->getHttpVerb()) . 'Request';
+        $method = 'new' . ucfirst(strtolower($request->getHttpVerb())) . 'Request';
         return call_user_func_array(array($this, $method), array($request));
     }
 
@@ -184,6 +184,127 @@ class HttpClient
         // return the results
         return $response;
     }
+
+    // =========================================================================
+    //
+    // Support for PUT requests, possibly ones that stream
+    //
+    // -------------------------------------------------------------------------
+
+    /**
+     * Make a new PUT request to the HTTP server
+     *
+     * NOTE: the connection to the HTTP server will only be closed *if* the
+     *       HTTP server sends a Connection: close header
+     *
+     * @param HttpClientRequest $request the request to make
+     * @return HttpClientResponse what we got back from the HTTP server
+     */
+    public function newPutRequest(HttpClientRequest $request)
+    {
+        // var_dump('>> PUT ' . (string)$request->getAddress());
+        // can we connect to the remote server?
+        $this->connection = new HttpClientConnection();
+        if (!$this->connection->connect($request->getAddress(), 5))
+        {
+            // could not connect
+            return false;
+        }
+
+        // choose a transport; this may change as we work with the connection
+        if ($request->getAddress()->scheme == 'ws')
+        {
+            $this->transport = new WsTransport();
+        }
+        else
+        {
+            $this->transport = new HttpDefaultTransport();
+        }
+
+        // now, send the GET request
+        $this->transport->sendPut($this->connection, $request);
+
+        // listen for an answer
+        $response = $this->transport->readResponse($this->connection, $request);
+
+        // at this point, we have read all of the headers sent back to us
+        //
+        // do we need to switch transports?
+        if ($response->transferIsChunked())
+        {
+            $this->transport = new HttpChunkedTransport();
+        }
+
+        // now, do we have any valid content to read?
+        if ($response->type && !$response->hasErrors())
+        {
+            $this->transport->readContent($this->connection, $response);
+        }
+
+        // return the results
+        return $response;
+    }
+
+    // =========================================================================
+    //
+    // Support for DELETE requests, possibly ones that stream
+    //
+    // -------------------------------------------------------------------------
+
+    /**
+     * Make a new DELETE request to the HTTP server
+     *
+     * NOTE: the connection to the HTTP server will only be closed *if* the
+     *       HTTP server sends a Connection: close header
+     *
+     * @param HttpClientRequest $request the request to make
+     * @return HttpClientResponse what we got back from the HTTP server
+     */
+    public function newDeleteRequest(HttpClientRequest $request)
+    {
+        // var_dump('>> DELETE ' . (string)$request->getAddress());
+        // can we connect to the remote server?
+        $this->connection = new HttpClientConnection();
+        if (!$this->connection->connect($request->getAddress(), 5))
+        {
+            // could not connect
+            return false;
+        }
+
+        // choose a transport; this may change as we work with the connection
+        if ($request->getAddress()->scheme == 'ws')
+        {
+            $this->transport = new WsTransport();
+        }
+        else
+        {
+            $this->transport = new HttpDefaultTransport();
+        }
+
+        // now, send the GET request
+        $this->transport->sendDelete($this->connection, $request);
+
+        // listen for an answer
+        $response = $this->transport->readResponse($this->connection, $request);
+
+        // at this point, we have read all of the headers sent back to us
+        //
+        // do we need to switch transports?
+        if ($response->transferIsChunked())
+        {
+            $this->transport = new HttpChunkedTransport();
+        }
+
+        // now, do we have any valid content to read?
+        if ($response->type && !$response->hasErrors())
+        {
+            $this->transport->readContent($this->connection, $response);
+        }
+
+        // return the results
+        return $response;
+    }
+
 
     /**
      * Read more data from an existing HTTP connection

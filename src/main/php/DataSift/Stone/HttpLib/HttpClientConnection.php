@@ -100,6 +100,9 @@ class HttpClientConnection
         // if we get here, we have a successful connection
         // $context->stats->increment('connect.success');
 
+        // set the stream to timeout aggressively
+        socket_set_timeout($this->socket, 0, 1000);
+
         $this->connectStart = $microStart;
         $this->connectEnd   = $microEnd;
 
@@ -144,12 +147,13 @@ class HttpClientConnection
     {
         // var_dump('>> readLine() ' . __LINE__);
         $line = false;
-        do
+        while(!$line && !$this->feof())
         {
+            // var_dump($this->feof());
             $line = fgets($this->socket);
+            // var_dump($line);
         }
-        while (!$line && !$this->feof());
-        // var_dump($line);
+        // while (!$line && !$this->feof());
 
         return $line;
     }

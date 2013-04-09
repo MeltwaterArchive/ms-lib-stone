@@ -122,7 +122,7 @@ abstract class HttpTransport
         // send the request
         //var_dump('>> SENDING');
         $connection->send($request->getRequestLine() . self::CRLF);
-        $encodedData = $request->getPostBody();
+        $encodedData = $request->getBody();
         if (!$request->hasHeaderCalled('Content-Type'))
         {
             $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -130,7 +130,7 @@ abstract class HttpTransport
         $request->withExtraHeader('Content-Length', strlen($encodedData));
 
         // send any supporting headers
-        $this->addAdditionalHeadersToRequest($context, $request);
+        $this->addAdditionalHeadersToRequest($request);
         $headers = $request->getHeadersString();
         if ($headers !== null)
         {
@@ -177,7 +177,7 @@ abstract class HttpTransport
         // send the request
         //var_dump('>> SENDING');
         $connection->send($request->getRequestLine() . self::CRLF);
-        $encodedData = $request->getPostBody();
+        $encodedData = $request->getBody();
         if (!$request->hasHeaderCalled('Content-Type'))
         {
             $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -185,7 +185,7 @@ abstract class HttpTransport
         $request->withExtraHeader('Content-Length', strlen($encodedData));
 
         // send any supporting headers
-        $this->addAdditionalHeadersToRequest($context, $request);
+        $this->addAdditionalHeadersToRequest($request);
         $headers = $request->getHeadersString();
         if ($headers !== null)
         {
@@ -215,7 +215,7 @@ abstract class HttpTransport
      *     HttpClientResponse on success,
      *     false if the connection was not open
      */
-    public function sendGet(HttpClientConnection $connection, HttpClientRequest $request)
+    public function sendDelete(HttpClientConnection $connection, HttpClientRequest $request)
     {
         // log how many GET requests we have made
         // $context->stats->increment('request.verb.get');
