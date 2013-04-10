@@ -247,7 +247,7 @@ class HttpClientRequest
 
     public function addData($name, $value)
     {
-        $this->postBody[$name] = $value;
+        $this->body[$name] = $value;
     }
 
     public function setPayload($payload)
