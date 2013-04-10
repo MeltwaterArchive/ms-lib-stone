@@ -20,6 +20,7 @@
 
 namespace DataSift\Stone\ConfigLib;
 
+use stdClass;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\ObjectLib\BaseObject;
 
@@ -157,6 +158,66 @@ abstract class BaseConfigLoader
         // all done
     }
 
+    public function loadRuntimeConfig()
+    {
+        // where is the user's home directory?
+        $home = getenv("HOME");
+        if (empty($home)) {
+            // we don't know ... we cannot continue
+            return new BaseObject();
+        }
+
+        // where will the runtime file be?
+        $filename = "{$home}/.{$this->appName}/runtime.{$this->configSuffix}";
+
+        // does it exist?
+        if (!file_exists($filename)) {
+            // no - nothing more to do
+            return new BaseObject();
+        }
+
+        // we have a file to load
+        $newConfig = $this->loadConfigFile($filename);
+
+        // all done
+        return $newConfig;
+    }
+
+    public function saveRuntimeConfig(BaseObject $config)
+    {
+        // where is the user's home directory?
+        $home = getenv("HOME");
+        if (empty($home)) {
+            // we don't know ... we cannot continue
+            return;
+        }
+
+        // which folder will we store the data in?
+        $filename = "{$home}/.{$this->appName}";
+
+        // does it exist?
+        if (!file_exists($filename)) {
+            // no - create it
+            $success = mkdir($filename, 0700, true);
+
+            // did it work?
+            if (!$success) {
+                throw new E5xx_CannotCreateRuntimeConfigFolder($filename);
+            }
+        }
+
+        // where will the runtime file be?
+        $filename .= "/runtime.{$this->configSuffix}";
+
+        // convert the config
+        $data = $this->encodeConfig($config);
+
+        // write out the data
+        file_put_contents($filename, $data);
+
+        // all done
+    }
+
     protected function loadFileFromDefaultPaths($configName)
     {
         // a list of everywhere that we have looked, in case we can't find
@@ -259,4 +320,16 @@ abstract class BaseConfigLoader
      *         the results of decoding the config file
      */
     abstract protected function decodeLoadedFile($rawConfig);
+
+    /**
+     * encode a tree of objects into a string suitable for saving into
+     * a config file on disk
+     *
+     * @param  stdClass $config
+     *         the config to be encoded
+     *
+     * @return string
+     *         the encoded data
+     */
+    abstract protected function encodeConfig(stdClass $config);
 }

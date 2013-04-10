@@ -18,12 +18,8 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\ConfigLib;
-
-use stdClass;
-
 /**
- * A simple library to load a JSON-encoded config file from disk
+ * Exception for when unhandled messages occur
  *
  * @category Libraries
  * @package  Stone/ConfigLib
@@ -32,20 +28,15 @@ use stdClass;
  * @link     http://www.mediasift.com
  */
 
-class JsonConfigLoader extends BaseConfigLoader implements ConfigLoader
+namespace DataSift\Stone\ConfigLib;
+
+use DataSift\Stone\ExceptionsLib\Exxx_Exception;
+
+class E5xx_CannotCreateRuntimeConfigFolder extends Exxx_Exception
 {
-    public function __construct($appName, $topDir)
+    public function __construct($configDir)
     {
-        parent::__construct($appName, $topDir, 'json');
-    }
-
-    protected function encodeConfig(stdClass $config)
-    {
-    	return json_encode($config);
-    }
-
-    protected function decodeLoadedFile($rawConfig)
-    {
-        return json_decode($rawConfig);
+    	$msg = "Cannot create folder '{$configDir}' to hold cached data";
+        parent::__construct(500, $msg, $msg);
     }
 }
