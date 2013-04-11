@@ -320,7 +320,7 @@ abstract class BaseConfigLoader
      * @return stdClass
      *         the results of decoding the config file
      */
-    abstract protected function decodeLoadedFile($rawConfig);
+    abstract public function decodeLoadedFile($rawConfig);
 
     /**
      * encode a tree of objects into a string suitable for saving into
@@ -332,5 +332,5 @@ abstract class BaseConfigLoader
      * @return string
      *         the encoded data
      */
-    abstract protected function encodeConfig(stdClass $config);
+    abstract public function encodeConfig(stdClass $config);
 }

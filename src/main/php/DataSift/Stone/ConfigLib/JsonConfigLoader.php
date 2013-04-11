@@ -39,12 +39,12 @@ class JsonConfigLoader extends BaseConfigLoader implements ConfigLoader
         parent::__construct($appName, $topDir, 'json');
     }
 
-    protected function encodeConfig(stdClass $config)
+    public function encodeConfig(stdClass $config)
     {
     	return json_encode($config);
     }
 
-    protected function decodeLoadedFile($rawConfig)
+    public function decodeLoadedFile($rawConfig)
     {
         return json_decode($rawConfig);
     }
