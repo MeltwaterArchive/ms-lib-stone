@@ -183,7 +183,7 @@ abstract class BaseConfigLoader
         return $newConfig;
     }
 
-    public function saveRuntimeConfig(BaseObject $config)
+    public function saveRuntimeConfig(stdClass $config)
     {
         // where is the user's home directory?
         $home = getenv("HOME");
@@ -266,7 +266,8 @@ abstract class BaseConfigLoader
         // we could potentially get legacy errors here, so best to wrap
         // things up
         $wrapper = new LegacyErrorCatcher();
-        return $wrapper->callUserFuncArray(function() use($filename) {
+        $configLoader = $this;
+        return $wrapper->callUserFuncArray(function() use($filename, $configLoader) {
             // open the file
             $rawConfig = @file_get_contents($filename);
             if (!$rawConfig || !is_string($rawConfig) || empty($rawConfig))
@@ -275,7 +276,7 @@ abstract class BaseConfigLoader
             }
 
             // decode the contents
-            $config = $this->decodeLoadedFile($rawConfig);
+            $config = $configLoader->decodeLoadedFile($rawConfig);
 
             // did it work?
             if (get_class($config) != "stdClass")
