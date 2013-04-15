@@ -54,13 +54,22 @@ class HttpClientConnection
     public $connectStart = null;
 
     /**
+     * how long to go before timing out operations, in seconds
+     *
+     * the default is 5 seconds
+     *
+     * @var float
+     */
+    private $timeout = 5.0;
+
+    /**
      * Connect to the given URL
      *
      * @param HttpClientRequest $request
      * @param int $timeout
      * @return boolean did we successfully connect?
      */
-    public function connect(HttpAddress $address)
+    public function connect(HttpAddress $address, $timeout = 5.0)
     {
         // timers!
         //var_dump('>> CONNECTING');
@@ -102,6 +111,9 @@ class HttpClientConnection
 
         // set the stream to timeout aggressively
         socket_set_timeout($this->socket, 0, 1000);
+
+        // set our own operations to timeout
+        $this->timeout = (float)$timeout;
 
         $this->connectStart = $microStart;
         $this->connectEnd   = $microEnd;
@@ -145,13 +157,17 @@ class HttpClientConnection
      */
     public function readLine()
     {
+        $start = microtime(true);
+
         // var_dump('>> readLine() ' . __LINE__);
         $line = false;
-        while(!$line && !$this->feof())
+        $now  = microtime(true);
+        while(!$line && !$this->feof() && ($start + $now < $this->timeout))
         {
             // var_dump($this->feof());
             $line = fgets($this->socket);
             // var_dump($line);
+            $now = microtime(true);
         }
         // while (!$line && !$this->feof());
 
@@ -170,12 +186,15 @@ class HttpClientConnection
     {
         // var_dump('>> readBlock(' . $blockSize . ')');
 
+        $start = microtime(true);
+
         $block = '';
         do
         {
             $block .= fread($this->socket, $blockSize - strlen($block));
+            $now   = microtime(true);
         }
-        while (strlen($block) < $blockSize && !$this->feof());
+        while (strlen($block) < $blockSize && !$this->feof() && $start + $now < $this->timeout);
 
         // var_dump($block);
 

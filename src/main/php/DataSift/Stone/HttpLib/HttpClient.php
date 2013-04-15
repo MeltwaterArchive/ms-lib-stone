@@ -92,7 +92,7 @@ class HttpClient
         // var_dump('>> GET ' . (string)$request->getAddress());
         // can we connect to the remote server?
         $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($request->getAddress(), 5))
+        if (!$this->connection->connect($request->getAddress()))
         {
             // could not connect
             return false;
