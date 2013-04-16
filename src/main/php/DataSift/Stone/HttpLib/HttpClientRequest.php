@@ -51,7 +51,6 @@ class HttpClientRequest
 
     public $headers = array(
         'Accept'            => 'text/html,application/xhtml,+xml,application/xml,application/json',
-        'AcceptEncoding'    => 'none',
         'AcceptCharset'     => 'utf-8',
         'Connection'        => 'keep-alive',
         'UserAgent'         => 'Hornet/6.6.6 (DataSift Hive) PHP/CLI (Hornet, like wasps only with evil intent)',
@@ -228,6 +227,10 @@ class HttpClientRequest
         return $this->withHttpVerb("GET");
     }
 
+    public function setGetRequest()
+    {
+        return $this->withHttpVerb("GET");
+    }
 
     // =========================================================================
     //
@@ -240,7 +243,17 @@ class HttpClientRequest
         return $this->withHttpVerb("POST");
     }
 
+    public function setPostRequest()
+    {
+        return $this->withHttpVerb("POST");
+    }
+
     public function asPutRequest()
+    {
+        return $this->withHttpVerb("PUT");
+    }
+
+    public function setPutRequest()
     {
         return $this->withHttpVerb("PUT");
     }
@@ -248,6 +261,12 @@ class HttpClientRequest
     public function addData($name, $value)
     {
         $this->body[$name] = $value;
+    }
+
+    public function withPayload($payload)
+    {
+        $this->body = $payload;
+        return $this;
     }
 
     public function setPayload($payload)

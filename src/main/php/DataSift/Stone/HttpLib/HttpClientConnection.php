@@ -161,16 +161,20 @@ class HttpClientConnection
 
         // var_dump('>> readLine() ' . __LINE__);
         $line = false;
-        $now  = microtime(true);
-        while(!$line && !$this->feof() && ($start + $now < $this->timeout))
+        do
         {
             // var_dump($this->feof());
             $line = fgets($this->socket);
             // var_dump($line);
             $now = microtime(true);
         }
-        // while (!$line && !$this->feof());
+        while(!$line && !$this->feof() && ($now < ($start + $this->timeout)));
 
+        // var_dump($line);
+        // var_dump($this->feof());
+        // var_dump($start + $this->timeout);
+        // var_dump($now);
+        // var_dump($now < $start + $this->timeout);
         return $line;
     }
 
@@ -226,6 +230,7 @@ class HttpClientConnection
         }
 
         // send the data
+        // var_dump($data);
         fwrite($this->socket, $data, strlen($data));
         fflush($this->socket);
     }

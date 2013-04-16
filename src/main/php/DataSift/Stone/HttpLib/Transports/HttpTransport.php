@@ -141,7 +141,7 @@ abstract class HttpTransport
         $connection->send(self::CRLF);
         //var_dump('>> SENT');
 
-        $connection->send($encodedData . self::CRLF);
+        $connection->send($encodedData);
 
         // how long did that take?
         // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);

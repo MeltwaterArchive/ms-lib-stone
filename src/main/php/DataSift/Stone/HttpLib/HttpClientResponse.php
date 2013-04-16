@@ -183,6 +183,11 @@ class HttpClientResponse
             $append = true;
         }
 
+        // do we need to mark this request as needing to disconnect?
+        if ($this->httpVersion == '1.0') {
+            $this->mustClose = true;
+        }
+
         // mark the request as valid
         //
         // we mark the response as being a plain old HTTP response
