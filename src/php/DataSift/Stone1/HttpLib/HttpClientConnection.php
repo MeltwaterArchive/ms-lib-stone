@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone
+ * Stone1
  *
  * PHP Version 5.3
  *
@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone1
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -18,20 +18,20 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\HttpLib;
+namespace DataSift\Stone1\HttpLib;
 
 use Exception;
-use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
-use DataSift\Stone\StatsLib\StatsdClient;
+use DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher;
+use DataSift\Stone1\StatsLib\StatsdClient;
 
-use DataSift\Stone\HttpLib\Transports\HttpChunkedTransport;
-use DataSift\Stone\HttpLib\Transports\HttpDefaultTransport;
+use DataSift\Stone1\HttpLib\Transports\HttpChunkedTransport;
+use DataSift\Stone1\HttpLib\Transports\HttpDefaultTransport;
 
 /**
  * Low-level connection to a HTTP server
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone1
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com

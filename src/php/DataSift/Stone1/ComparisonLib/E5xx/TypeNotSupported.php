@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone1
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -23,15 +23,15 @@
  * type of variable it has been asked to work on
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone1
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
  */
 
-namespace DataSift\Stone\ComparisonLib;
+namespace DataSift\Stone1\ComparisonLib;
 
-use DataSift\Stone\ExceptionsLib\Exxx_Exception;
+use DataSift\Stone1\ExceptionsLib\Exxx_Exception;
 
 class E5xx_TypeNotSupported extends Exxx_Exception
 {

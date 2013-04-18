@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone1
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -18,16 +18,16 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\HtmlLib;
+namespace DataSift\Stone1\HtmlLib;
 
 use stdClass;
-use DataSift\Stone\LogLib\Log;
+use DataSift\Stone1\LogLib\Log;
 
 /**
  * Helper class for loading widget classes on demand
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone1
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
@@ -57,8 +57,8 @@ class WidgetLoader
         }
 
         // add in our two fallbacks
-        $classesToLookFor[] = 'DataSift\\Stone\\HtmlLib\\Widgets\\' . $name . 'Widget';
-        $classesToLookFor[] = 'DataSift\\Stone\\HtmlLib\\Widgets\\TextWidget';
+        $classesToLookFor[] = 'DataSift\\Stone1\\HtmlLib\\Widgets\\' . $name . 'Widget';
+        $classesToLookFor[] = 'DataSift\\Stone1\\HtmlLib\\Widgets\\TextWidget';
 
         // go searching!
         foreach ($classesToLookFor as $classToLookFor)

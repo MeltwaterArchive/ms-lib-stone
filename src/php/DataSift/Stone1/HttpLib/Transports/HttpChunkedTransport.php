@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone1
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -18,20 +18,20 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\HttpLib\Transports;
+namespace DataSift\Stone1\HttpLib\Transports;
 
 use Exception;
-use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
-use DataSift\Stone\HttpLib\HttpClientConnection;
-use DataSift\Stone\HttpLib\HttpClientRequest;
-use DataSift\Stone\HttpLib\HttpClientResponse;
-use DataSift\Stone\LogLib\Log;
+use DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher;
+use DataSift\Stone1\HttpLib\HttpClientConnection;
+use DataSift\Stone1\HttpLib\HttpClientRequest;
+use DataSift\Stone1\HttpLib\HttpClientResponse;
+use DataSift\Stone1\LogLib\Log;
 
 /**
  * Support for dealing with content that is chunked
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone1
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -18,17 +18,17 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\RouterLib;
+namespace DataSift\Stone1\RouterLib;
 
-use DataSift\Stone\HtmlLib\FormData;
-use DataSift\Stone\HttpLib\HttpData;
-use DataSift\Stone\LogLib\Log;
+use DataSift\Stone1\HtmlLib\FormData;
+use DataSift\Stone1\HttpLib\HttpData;
+use DataSift\Stone1\LogLib\Log;
 
 /**
  * A very simple router to help work out where to send a request
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone1
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com

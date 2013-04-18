@@ -1,13 +1,13 @@
 <?php
 
-namespace DataSift\Stone\TimeLib;
+namespace DataSift\Stone1\TimeLib;
 
 use PHPUnit_Framework_TestCase;
 
 class DateTimeTest extends PHPUnit_Framework_TestCase
 {
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::__construct
+	 * @covers DataSift\Stone1\TimeLib\DateTime::__construct
 	 */
 	public function testCanInstantiate()
 	{
@@ -19,11 +19,11 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	    // ----------------------------------------------------------------
 	    // test the results
 
-		$this->assertTrue($obj instanceof \DataSift\Stone\TimeLib\DateTime);
+		$this->assertTrue($obj instanceof \DataSift\Stone1\TimeLib\DateTime);
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::__construct
+	 * @covers DataSift\Stone1\TimeLib\DateTime::__construct
 	 */
 	public function testDefaultsToCurrentTimestamp()
 	{
@@ -48,7 +48,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::__construct
+	 * @covers DataSift\Stone1\TimeLib\DateTime::__construct
 	 */
 	public function testCanInstantiateWithSpecifiedTimestamp()
 	{
@@ -73,7 +73,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::__construct
+	 * @covers DataSift\Stone1\TimeLib\DateTime::__construct
 	 */
 	public function testCanInstantiateWithOffset()
 	{
@@ -98,7 +98,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::applyOffset
+	 * @covers DataSift\Stone1\TimeLib\DateTime::applyOffset
 	 */
 	public function testCanApplyPositiveOffsetAfterInstantiation()
 	{
@@ -124,7 +124,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::applyOffset
+	 * @covers DataSift\Stone1\TimeLib\DateTime::applyOffset
 	 */
 	public function testCanApplyNegativeOffsetAfterInstantiation()
 	{
@@ -150,7 +150,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::getDate
+	 * @covers DataSift\Stone1\TimeLib\DateTime::getDate
 	 */
 	public function testCanGetDate()
 	{
@@ -170,7 +170,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::getDateTime
+	 * @covers DataSift\Stone1\TimeLib\DateTime::getDateTime
 	 */
 	public function testCanGetDateTime()
 	{
@@ -190,7 +190,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::getDateTimeAtMidnight
+	 * @covers DataSift\Stone1\TimeLib\DateTime::getDateTimeAtMidnight
 	 */
 	public function testCanGetDateTimeAtMidnight()
 	{
@@ -210,7 +210,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::getSecondsSinceStartOfMonth
+	 * @covers DataSift\Stone1\TimeLib\DateTime::getSecondsSinceStartOfMonth
 	 */
 	public function testCanGetSecondsSinceStartOfMonth()
 	{
@@ -241,8 +241,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::__construct
-	 * @covers DataSift\Stone\TimeLib\DateTime::getTimezoneName
+	 * @covers DataSift\Stone1\TimeLib\DateTime::__construct
+	 * @covers DataSift\Stone1\TimeLib\DateTime::getTimezoneName
 	 */
 	public function testDefaultsToUTCTimezone()
 	{
@@ -260,7 +260,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone\TimeLib\DateTime::getTimezoneName
+	 * @covers DataSift\Stone1\TimeLib\DateTime::getTimezoneName
 	 */
 	public function testCanGetTimezoneName()
 	{

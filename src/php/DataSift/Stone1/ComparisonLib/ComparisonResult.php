@@ -1,6 +1,6 @@
 <?php
 
-namespace DataSift\Stone\ComparisonLib;
+namespace DataSift\Stone1\ComparisonLib;
 
 class ComparisonResult
 {

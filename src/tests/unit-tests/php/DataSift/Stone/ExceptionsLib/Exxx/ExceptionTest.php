@@ -1,13 +1,13 @@
 <?php
 
-namespace DataSift\Stone\ExceptionsLib;
+namespace DataSift\Stone1\ExceptionsLib;
 
 use PHPUnit_Framework_TestCase;
 
 class Exxx_ExceptionTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::__construct
      */
     public function testCanInstantiate()
     {
@@ -23,7 +23,7 @@ class Exxx_ExceptionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::__construct
      */
     public function testMustSetErrorCodeOnInstantiation()
     {
@@ -45,7 +45,7 @@ class Exxx_ExceptionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::__construct
      */
     public function testMustSetPublicErrorMessageOnInstantiation()
     {
@@ -67,9 +67,9 @@ class Exxx_ExceptionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::__construct
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::getDevMessage
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::setDevMessage
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::getDevMessage
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::setDevMessage
      */
     public function testMustSetDevErrorMessageOnInstantiation()
     {
@@ -91,7 +91,7 @@ class Exxx_ExceptionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\Exxx_Exception::__toString
+     * @covers DataSift\Stone1\ExceptionsLib\Exxx_Exception::__toString
      */
     public function testCanConvertToString()
     {

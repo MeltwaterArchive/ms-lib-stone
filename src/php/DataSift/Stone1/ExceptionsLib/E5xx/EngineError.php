@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone\ExceptionsLib
+ * @package   Stone1\ExceptionsLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -23,13 +23,13 @@
  * error, and needs to convert it into an exception
  *
  * @category Libraries
- * @package  Stone\ExceptionsLib
+ * @package  Stone1\ExceptionsLib
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
  */
 
-namespace DataSift\Stone\ExceptionsLib;
+namespace DataSift\Stone1\ExceptionsLib;
 
 class E5xx_EngineError extends Exxx_Exception
 {

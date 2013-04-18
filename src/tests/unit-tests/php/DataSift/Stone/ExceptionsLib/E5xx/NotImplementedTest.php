@@ -1,13 +1,13 @@
 <?php
 
-namespace DataSift\Stone\ExceptionsLib;
+namespace DataSift\Stone1\ExceptionsLib;
 
 use PHPUnit_Framework_TestCase;
 
 class E5xx_NotImplementedTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_NotImplemented::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_NotImplemented::__construct
      */
     public function testCanInstantiate()
     {
@@ -23,7 +23,7 @@ class E5xx_NotImplementedTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_NotImplemented::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_NotImplemented::__construct
      */
     public function testErrorCodeIs500()
     {
@@ -45,7 +45,7 @@ class E5xx_NotImplementedTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_NotImplemented::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_NotImplemented::__construct
      */
     public function testErrorMessageIsTheMethodNotImplemented()
     {

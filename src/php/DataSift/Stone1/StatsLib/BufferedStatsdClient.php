@@ -6,7 +6,7 @@
  * This is derived from the original Etsy PHP client
  **/
 
-namespace DataSift\Stone\StatsLib;
+namespace DataSift\Stone1\StatsLib;
 
 class BufferedStatsdClient
 {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -10,7 +10,7 @@
  * Distribution of this software is strictly forbidden under the terms of this license.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone1
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011 MediaSift Ltd.
  * @license   http://mediasift.com/licenses/internal MediaSift Internal License
@@ -18,7 +18,7 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\ObjectLib;
+namespace DataSift\Stone1\ObjectLib;
 
 use ReflectionObject;
 use ReflectionProperty;
@@ -34,7 +34,7 @@ use stdClass;
  * a lot less code in our particular JSON-driven environment :)
  *
  * @category Libraries
- * @package  Stone/ObjectLib
+ * @package  Stone1/ObjectLib
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com

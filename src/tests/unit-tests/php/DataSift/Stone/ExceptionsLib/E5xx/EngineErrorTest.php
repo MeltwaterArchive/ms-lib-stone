@@ -1,13 +1,13 @@
 <?php
 
-namespace DataSift\Stone\ExceptionsLib;
+namespace DataSift\Stone1\ExceptionsLib;
 
 use PHPUnit_Framework_TestCase;
 
 class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testCanInstantiate()
     {
@@ -23,7 +23,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testErrorCodeIs500()
     {
@@ -45,7 +45,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testSupportsE_Warning()
     {
@@ -68,7 +68,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testSupportsE_Notice()
     {
@@ -91,7 +91,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testSupportsE_User_Error()
     {
@@ -114,7 +114,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testSupportsE_User_Warning()
     {
@@ -137,7 +137,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testSupportsE_User_Notice()
     {
@@ -160,7 +160,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testSupportsE_Recoverable_Error()
     {
@@ -183,7 +183,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::__construct
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::__construct
      */
     public function testHandlesUnknownErrorCodes()
     {
@@ -206,7 +206,7 @@ class E5xx_EngineErrorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DataSift\Stone\ExceptionsLib\E5xx_EngineError::getEngineError
+     * @covers DataSift\Stone1\ExceptionsLib\E5xx_EngineError::getEngineError
      */
     public function testCanGetEngineErrorCode()
     {

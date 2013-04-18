@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Stone1 - A PHP Library
  *
  * PHP Version 5.3
  *
@@ -18,15 +18,15 @@
  * @link      http://www.mediasift.com
  */
 
-namespace DataSift\Stone\RouterLib;
+namespace DataSift\Stone1\RouterLib;
 
-use DataSift\Stone\LogLib\Log;
+use DataSift\Stone1\LogLib\Log;
 
 /**
  * A container for the routes that an application supports
  *
  * @category Libraries
- * @package  Stone
+ * @package  Stone1
  * @author   Stuart Herbert <stuart.herbert@datasift.com>
  * @license  http://mediasift.com/licenses/internal MediaSift Internal License
  * @link     http://www.mediasift.com
