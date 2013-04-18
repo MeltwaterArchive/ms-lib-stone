@@ -43,7 +43,7 @@ class Router
         $this->appDir = $basedir;
     }
 
-    public function determineScriptForRequest(Routes $routes, HttpData $get, FormData $_POST)
+    public function determineScriptForRequest(Routes $routes, HttpData $get, FormData $post)
     {
         // what is the current HTML verb?
         $verb = basename($_SERVER['REQUEST_METHOD']);
