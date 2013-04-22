@@ -278,6 +278,10 @@ abstract class BaseConfigLoader
         // we have a file to load
         $newConfig = $this->loadConfigFile($filename);
 
+        // convert it into a LoadedConfig object
+        $config = new LoadedConfig();
+        $config->mergeFrom($newConfig);
+
         // all done
         return $newConfig;
     }
@@ -410,7 +414,7 @@ abstract class BaseConfigLoader
             $config = $configLoader->decodeLoadedFile($rawConfig);
 
             // did it work?
-            if (get_class($config) != "stdClass")
+            if (!is_object($config))
             {
                 throw new E5xx_InvalidConfigFile("Config file '$filename' contains invalid JSON");
             }
