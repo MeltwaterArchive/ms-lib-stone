@@ -283,7 +283,7 @@ abstract class BaseConfigLoader
         $config->mergeFrom($newConfig);
 
         // all done
-        return $newConfig;
+        return $config;
     }
 
     /**
