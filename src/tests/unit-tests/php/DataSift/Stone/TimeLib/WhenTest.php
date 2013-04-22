@@ -1,6 +1,6 @@
 <?php
 
-namespace DataSift\Stone1\TimeLib;
+namespace DataSift\Stone\TimeLib;
 
 use PHPUnit_Framework_TestCase;
 use ReflectionClass;
@@ -8,14 +8,14 @@ use ReflectionClass;
 class WhenTest extends PHPUnit_Framework_TestCase
 {
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::__construct
+	 * @covers DataSift\Stone\TimeLib\When::__construct
 	 */
 	public function testCannotInstantiate()
 	{
 	    // ----------------------------------------------------------------
 	    // perform the change
 
-		$refClass = new ReflectionClass('DataSift\Stone1\TimeLib\When');
+		$refClass = new ReflectionClass('DataSift\Stone\TimeLib\When');
 		$refMethod = $refClass->getMethod('__construct');
 
 		// ----------------------------------------------------------------
@@ -25,8 +25,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testHandlesZeroAgeAsSpecialCase()
 	{
@@ -47,8 +47,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testCanGetAgeInDays()
 	{
@@ -78,8 +78,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testCanGetAgeInHours()
 	{
@@ -109,8 +109,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testCanGetAgeInMinutes()
 	{
@@ -140,8 +140,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testCanGetAgeInDaysHoursAndMinutes()
 	{
@@ -173,8 +173,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testSupportsSingleAndPluralDays()
 	{
@@ -208,8 +208,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testSupportsSingleAndPluralHours()
 	{
@@ -243,8 +243,8 @@ class WhenTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\When::age_asString
-	 * @covers DataSift\Stone1\TimeLib\When::expandTimeAge
+	 * @covers DataSift\Stone\TimeLib\When::age_asString
+	 * @covers DataSift\Stone\TimeLib\When::expandTimeAge
 	 */
 	public function testSupportsSingleAndPluralMinutes()
 	{

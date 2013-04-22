@@ -1,13 +1,13 @@
 <?php
 
-namespace DataSift\Stone1\TimeLib;
+namespace DataSift\Stone\TimeLib;
 
 use PHPUnit_Framework_TestCase;
 
 class DateIntervalTest extends PHPUnit_Framework_TestCase
 {
 	/**
-	 * @covers DataSift\Stone1\TimeLib\DateInterval::__construct
+	 * @covers DataSift\Stone\TimeLib\DateInterval::__construct
 	 */
 	public function testCanInstantiate()
 	{
@@ -19,11 +19,11 @@ class DateIntervalTest extends PHPUnit_Framework_TestCase
 	    // ----------------------------------------------------------------
 	    // test the results
 
-		$this->assertTrue($obj instanceof \DataSift\Stone1\TimeLib\DateInterval);
+		$this->assertTrue($obj instanceof \DataSift\Stone\TimeLib\DateInterval);
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\DateInterval::getTotalMinutes
+	 * @covers DataSift\Stone\TimeLib\DateInterval::getTotalMinutes
 	 */
 	public function testCanGetTotalMinutes()
 	{
@@ -55,7 +55,7 @@ class DateIntervalTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\TimeLib\DateInterval::getTotalSeconds
+	 * @covers DataSift\Stone\TimeLib\DateInterval::getTotalSeconds
 	 */
 	public function testCanGetTotalSeconds()
 	{

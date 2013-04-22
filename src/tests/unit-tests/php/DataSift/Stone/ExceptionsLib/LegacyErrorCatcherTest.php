@@ -1,6 +1,6 @@
 <?php
 
-namespace DataSift\Stone1\ExceptionsLib;
+namespace DataSift\Stone\ExceptionsLib;
 
 use Exception;
 use PHPUnit_Framework_TestCase;
@@ -17,11 +17,11 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	    // ----------------------------------------------------------------
 	    // test the results
 
-		$this->assertTrue($obj instanceof \DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher);
+		$this->assertTrue($obj instanceof \DataSift\Stone\ExceptionsLib\LegacyErrorCatcher);
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::callUserFuncArray
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::callUserFuncArray
 	 */
 	public function testCanWrapCallables()
 	{
@@ -45,7 +45,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::callUserFuncArray
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::callUserFuncArray
 	 */
 	public function testCanPassParamsIntoWrappedCallables()
 	{
@@ -69,7 +69,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::callUserFuncArray
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::callUserFuncArray
 	 */
 	public function testCanWrapLegacyErrors()
 	{
@@ -97,7 +97,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::__handleLegacyError
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::__handleLegacyError
 	 */
 	public function testThrowsNoExceptionForWarningsByDefault()
 	{
@@ -128,7 +128,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::__handleLegacyError
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::__handleLegacyError
 	 */
 	public function testThrowsExceptionForErrorsByDefault()
 	{
@@ -157,7 +157,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::__handleLegacyError
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::__handleLegacyError
 	 */
 	public function testThrowsOneExceptionIfMultipleErrorsEncountered()
 	{
@@ -198,7 +198,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::getWarningsAreFatal
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::getWarningsAreFatal
 	 */
 	public function testCanGetWarningsAreFatal()
 	{
@@ -214,8 +214,8 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::getWarningsAreFatal
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::setWarningsAreFatal
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::getWarningsAreFatal
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::setWarningsAreFatal
 	 */
 	public function testCanSetWarningsAreFatal()
 	{
@@ -237,7 +237,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::hasPendingException
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::hasPendingException
 	 */
 	public function testCanCheckForPendingException()
 	{
@@ -253,7 +253,7 @@ class LegacyErrorCatcherTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @covers DataSift\Stone1\ExceptionsLib\LegacyErrorCatcher::getPendingException
+	 * @covers DataSift\Stone\ExceptionsLib\LegacyErrorCatcher::getPendingException
 	 */
 	public function testCanGetPendingException()
 	{
