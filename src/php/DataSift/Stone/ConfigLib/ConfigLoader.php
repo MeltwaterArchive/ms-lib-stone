@@ -45,7 +45,6 @@ namespace DataSift\Stone\ConfigLib;
 
 use Exception;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
-use DataSift\Stone\ObjectLib\BaseObject;
 
 /**
  * The interface all ConfigLoaders must support
@@ -62,19 +61,19 @@ interface ConfigLoader
     /**
      * load your app's default config file
      *
-     * @return BaseObject
+     * @return LoadedConfig
      */
     public function loadDefaultConfig();
 
     /**
      * load any per-user config file that might exist
      *
-     * @param  BaseObject $config
+     * @param  LoadedConfig $config
      *         the existing config to merge into
-     * @return BaseObject
+     * @return LoadedConfig
      *         $config + the user's config (if any was found)
      */
-    public function loadUserConfig(BaseObject $config);
+    public function loadUserConfig(LoadedConfig $config);
 
     /**
      * load any override config from the local directory
@@ -83,12 +82,12 @@ interface ConfigLoader
      * into storyplayer. This allows us to keep those configs in their
      * own files, which makes maintenance much easier
      *
-     * @param  BaseObject $config
+     * @param  LoadedConfig $config
      *         the existing config to merge into
      * @param  string $basename
      *         the basename of the file to look for
-     * @return BaseObject
+     * @return LoadedConfig
      *         $config + any additional config (if any was found)
      */
-    public function loadAdditionalConfig(BaseObject $config, $basename);
+    public function loadAdditionalConfig(LoadedConfig $config, $basename);
 }
