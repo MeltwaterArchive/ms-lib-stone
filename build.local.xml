@@ -2,5 +2,8 @@
   <target name="help">
     <echo message="This component has no local build targets." />
   </target>
+  <target name="phpdoc">
+  	<exec command="phpdoc -d ${project.src.phpdir} -t ${project.review.docsdir}" logoutput="true"/>
+  </target>
 </project>
 <!-- vim: set tabstop=2 shiftwidth=2 expandtab: -->
