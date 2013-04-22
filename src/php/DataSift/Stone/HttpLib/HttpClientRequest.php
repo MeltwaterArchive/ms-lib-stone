@@ -1,33 +1,57 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Copyright (c) 2011-present Mediasift Ltd
+ * All rights reserved.
  *
- * PHP Version 5.3
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * This software is the intellectual property of MediaSift Ltd., and is covered
- * by retained intellectual property rights, including copyright.
- * Distribution of this software is strictly forbidden under the terms of this license.
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *   * Neither the names of the copyright holders nor the names of his
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone/HttpLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
- * @copyright 2011 MediaSift Ltd.
- * @license   http://mediasift.com/licenses/internal MediaSift Internal License
- * @version   SVN: $Revision: 2496 $
- * @link      http://www.mediasift.com
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
 
 namespace DataSift\Stone\HttpLib;
 
 /**
- * The request that we want to make
+ * The request that we want to make to the HTTP server
  *
- * @category Libraries
- * @package  Stone
- * @author   Stuart Herbert <stuart.herbert@datasift.com>
- * @license  http://mediasift.com/licenses/internal MediaSift Internal License
- * @link     http://www.mediasift.com
+ * @category  Libraries
+ * @package   Stone/HttpLib
+ * @author    Stuart Herbert <stuart.herbert@datasift.com>
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
 
 class HttpClientRequest
@@ -73,13 +97,19 @@ class HttpClientRequest
      *
      * We need to know the URL we are connecting to
      *
-     * @param type $addressString
+     * @param HttpAddress|string $address
      */
     public function __construct($address)
     {
         $this->setAddress($address);
     }
 
+    /**
+     * get the HTTP verb that we're going to use when we send this
+     * request to the HTTP server
+     *
+     * @return string
+     */
     public function getHttpVerb()
     {
         return $this->httpVerb;
@@ -204,6 +234,8 @@ class HttpClientRequest
     /**
      * Obtain the request line to send to the HTTP server
      *
+     * @param string $httpVersion
+     *        the HTTP version number to use in the request line
      * @return string
      */
     public function getRequestLine($httpVersion = '1.1')
@@ -227,6 +259,11 @@ class HttpClientRequest
         return $this->withHttpVerb("GET");
     }
 
+    /**
+     * mark this request as a HTTP GET request
+     *
+     * @return HttpClientRequest $this
+     */
     public function setGetRequest()
     {
         return $this->withHttpVerb("GET");
@@ -238,42 +275,92 @@ class HttpClientRequest
     //
     // -------------------------------------------------------------------------
 
+    /**
+     * mark this request as a HTTP POST request
+     *
+     * @return HttpClientRequest $this
+     */
     public function asPostRequest()
     {
         return $this->withHttpVerb("POST");
     }
 
+    /**
+     * mark this request as a HTTP POST request
+     *
+     * @return HttpClientRequest $this
+     */
     public function setPostRequest()
     {
         return $this->withHttpVerb("POST");
     }
 
+    /**
+     * mark this request as a HTTP PUT request
+     *
+     * @return HttpClientRequest $this
+     */
     public function asPutRequest()
     {
         return $this->withHttpVerb("PUT");
     }
 
+    /**
+     * mark this request as a HTTP PUT request
+     *
+     * @return HttpClientRequest $this
+     */
     public function setPutRequest()
     {
         return $this->withHttpVerb("PUT");
     }
 
+    /**
+     * add a key/value pair to the request's body data
+     *
+     * @param string $name
+     *        name of the key to add
+     * @param string $value
+     *        value of the data to add
+     */
     public function addData($name, $value)
     {
         $this->body[$name] = $value;
     }
 
+    /**
+     * set the body data for this request
+     *
+     * @param string $payload
+     *        the data to submit for this request
+     * @return HttpClientRequest $this
+     */
     public function withPayload($payload)
     {
         $this->body = $payload;
         return $this;
     }
 
+    /**
+     * set the body data for this request
+     *
+     * @param string $payload
+     *        the data to submit for this request
+     */
     public function setPayload($payload)
     {
         $this->body = $payload;
     }
 
+    /**
+     * get the body data for this request
+     *
+     * if the body data is an array of key/value pairs, we'll automatically
+     * convert that into an encoded string suitable for submitting as a
+     * POSTed form
+     *
+     * @return string
+     */
     public function getBody()
     {
         if (is_array($this->body))
@@ -286,6 +373,12 @@ class HttpClientRequest
         }
     }
 
+    /**
+     * get the body of the request, encoded for submitting as a POSTed
+     * form
+     *
+     * @return string
+     */
     public function getEncodedBody()
     {
         $return = '';
@@ -307,6 +400,11 @@ class HttpClientRequest
     //
     // -------------------------------------------------------------------------
 
+    /**
+     * mark this request as being a HTTP DELETE request
+     *
+     * @return HttpClientRequest $this
+     */
     public function asDeleteRequest()
     {
         return $this->withHttpVerb("DELETE");

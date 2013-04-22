@@ -1,39 +1,77 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Copyright (c) 2011-present Mediasift Ltd
+ * All rights reserved.
  *
- * PHP Version 5.3
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * This software is the intellectual property of MediaSift Ltd., and is covered
- * by retained intellectual property rights, including copyright.
- * Distribution of this software is strictly forbidden under the terms of this license.
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *   * Neither the names of the copyright holders nor the names of his
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone/LogLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
- * @copyright 2011 MediaSift Ltd.
- * @license   http://mediasift.com/licenses/internal MediaSift Internal License
- * @version   SVN: $Revision: 2496 $
- * @link      http://www.mediasift.com
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
 
 namespace DataSift\Stone\LogLib;
 
+use stdClass;
+
 /**
  * A static proxy around the underlying logger
  *
- * @category Libraries
- * @package  Stone
- * @author   Stuart Herbert <stuart.herbert@datasift.com>
- * @license  http://mediasift.com/licenses/internal MediaSift Internal License
- * @link     http://www.mediasift.com
+ * @category  Libraries
+ * @package   Stone/LogLib
+ * @author    Stuart Herbert <stuart.herbert@datasift.com>
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
-
 class Log
 {
-    private static $processName;
+    /**
+     * a list of enabled log levels
+     *
+     * this allows the user to disable any log levels that they wish, for
+     * example disabling debugging or trace messages to make the logs
+     * easier to read
+     *
+     * @var array
+     */
     private static $mask;
+
+    /**
+     * our log writer
+     * @var LogWriter
+     */
     private static $writer;
 
     // the list of logging levels
@@ -47,16 +85,22 @@ class Log
     const LOG_DEBUG = 8;
     const LOG_TRACE = 9;
 
-    static public function init($processName, $config)
+    /**
+     * initialise the logging engine
+     *
+     * @param  string $processName
+     *         the name of the process that is writing log messages
+     * @param  stdClass $config
+     *         the config for our logger
+     * @return void
+     */
+    static public function init($processName, stdClass $config)
     {
-        // what will we call ourselves?
-        self::setProcessName($processName);
-
         // what log levels are allowed?
         self::setLogMaskFromConfig($config->levels);
 
         // setup our writer
-        self::initWriter($config->writer);
+        self::initWriter($config->writer, $processName);
 
         // tell the world that we're alive
         self::write(self::LOG_DEBUG, "logger initialised");
@@ -98,6 +142,15 @@ class Log
         self::$writer->write($logLevel, $errMessage, $cause);
     }
 
+    /**
+     * shorthand for writing out a trace method
+     *
+     * @param  string $file
+     *         normally the __FILE__ pseudo-constant
+     * @param  int $line
+     *         normally the __LINE__ pseudo-constant
+     * @return void
+     */
     static public function trace($file, $line)
     {
         // is tracing enabled?
@@ -152,24 +205,16 @@ class Log
     }
 
     /**
-     * set the name of our process, which we'll use in (some of) our
-     * log writers
-     *
-     * @param string $processName the name of the process
-     */
-    static protected function setProcessName($processName)
-    {
-        self::$processName = $processName;
-    }
-
-    /**
      * create our actual writer, and initialise it
      *
      * the writer is the class that we're acting as a proxy for
      *
-     * @param string $writerName the name of the writer to load
+     * @param string $writerName
+     *        the name of the writer to load
+     * @param string $processName
+     *        the name of the process writing out log messages
      */
-    static protected function initWriter($writerName)
+    static protected function initWriter($writerName, $processName)
     {
         // create the writer
         $writerClass = __NAMESPACE__ . '\\' . $writerName;
@@ -179,6 +224,6 @@ class Log
         }
 
         self::$writer = new $writerClass;
-        self::$writer->init(self::$processName, posix_getpid());
+        self::$writer->init($processName, posix_getpid());
     }
 }

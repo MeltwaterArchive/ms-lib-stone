@@ -34,40 +34,81 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/LogLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\ObjectLib;
-
-use DataSift\Stone\ExceptionsLib\Exxx_Exception;
+namespace DataSift\Stone\LogLib;
 
 /**
- * Exception for when attempt made to access a property that does not exist
+ * Base class for all loggers
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/LogLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_NoSuchProperty extends Exxx_Exception
+abstract class LogWriter
 {
-	/**
-	 * constructor
-	 *
-	 * @param string $class
-	 *        name of the class where the property does not exist
-	 * @param string $property
-	 *        name of the property that does not exist
-	 */
-	public function __construct($class, $property)
-	{
-		$msg = "No such property: " . $property . " on instance of class: " . $class;
-		parent::__construct(500, $msg, $msg);
-	}
+    /**
+     * a list of the different log severities, and their text equivalent
+     * @var array
+     */
+    protected $prefixes = array (
+        Log::LOG_EMERGENCY => "1: EMERGENCY: ",
+        Log::LOG_ALERT     => "2: ALERT:     ",
+        Log::LOG_CRITICAL  => "3: CRITICAL:  ",
+        Log::LOG_ERROR     => "4: ERROR:     ",
+        Log::LOG_WARNING   => "5: WARNING:   ",
+        Log::LOG_NOTICE    => "6: NOTICE:    ",
+        Log::LOG_INFO      => "7: INFO:      ",
+        Log::LOG_DEBUG     => "8: DEBUG:     ",
+        Log::LOG_TRACE     => "9: TRACE:     ",
+    );
+
+    /**
+     * the name of the process writing log messages
+     * @var string
+     */
+    protected $processName;
+
+    /**
+     * the process ID of the process writing log messages
+     * @var [type]
+     */
+    protected $pid;
+
+    /**
+     * initialise this log writer
+     *
+     * @param  string $processName
+     *         the name of the process writing log messages
+     * @param  int $pid
+     *         the process ID of the process writing log messages
+     * @return void
+     */
+    public function init($processName, $pid)
+    {
+        $this->processName = $processName;
+        $this->pid = $pid;
+    }
+
+    /**
+     * write a log message
+     *
+     * @param  string $logLevel
+     *         the severity of the log message
+     *         (one of $this->$prefixes)
+     * @param  string $message
+     *         the log message to write
+     * @param  Exception $cause
+     *         the exception that caused the log message
+     * @return void
+     */
+    abstract public function write($logLevel, $message, $cause = null);
 }

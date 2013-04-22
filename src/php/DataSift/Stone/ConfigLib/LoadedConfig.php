@@ -34,40 +34,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/ConfigLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\ObjectLib;
+namespace DataSift\Stone\ConfigLib;
 
-use DataSift\Stone\ExceptionsLib\Exxx_Exception;
+use DataSift\Stone\ObjectLib\BaseObject;
 
 /**
- * Exception for when attempt made to access a property that does not exist
+ * Base class for our loaded config
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/ConfigLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_NoSuchProperty extends Exxx_Exception
+class LoadedConfig extends BaseObject
 {
-	/**
-	 * constructor
-	 *
-	 * @param string $class
-	 *        name of the class where the property does not exist
-	 * @param string $property
-	 *        name of the property that does not exist
-	 */
-	public function __construct($class, $property)
-	{
-		$msg = "No such property: " . $property . " on instance of class: " . $class;
-		parent::__construct(500, $msg, $msg);
-	}
+	// for now, we add no extra value
 }

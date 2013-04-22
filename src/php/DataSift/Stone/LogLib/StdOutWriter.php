@@ -34,40 +34,80 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/LogLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\ObjectLib;
+namespace DataSift\Stone\LogLib;
 
-use DataSift\Stone\ExceptionsLib\Exxx_Exception;
+use Exception;
 
 /**
- * Exception for when attempt made to access a property that does not exist
+ * A simple class for writing log messages to stdout
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/LogLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_NoSuchProperty extends Exxx_Exception
+class StdOutWriter extends LogWriter
 {
-	/**
-	 * constructor
-	 *
-	 * @param string $class
-	 *        name of the class where the property does not exist
-	 * @param string $property
-	 *        name of the property that does not exist
-	 */
-	public function __construct($class, $property)
-	{
-		$msg = "No such property: " . $property . " on instance of class: " . $class;
-		parent::__construct(500, $msg, $msg);
-	}
+    /**
+     * our stdout file descriptor
+     * @var resource
+     */
+    protected $fp;
+
+    /**
+     * initialise this log writer
+     *
+     * @param  string $processName
+     *         the name of the process writing log messages
+     * @param  int $pid
+     *         the process ID of the process writing log messages
+     * @return void
+     */
+    public function init($processName, $pid)
+    {
+        parent::init($processName, $pid);
+        $this->openStderr();
+    }
+
+    /**
+     * open stdout ready for writing
+     * @return void
+     */
+    protected function openStdout()
+    {
+        $this->fp = fopen("php://stdout", "w");
+        if (!$this->fp)
+        {
+            throw new E5xx_LogWriteFailure("Unable to open stdout for output");
+        }
+    }
+
+    /**
+     * write a log message
+     *
+     * @param  string $logLevel
+     *         the severity of the log message
+     *         (one of $this->$prefixes)
+     * @param  string $message
+     *         the log message to write
+     * @param  Exception $cause
+     *         the exception that caused the log message
+     * @return void
+     */
+    public function write($logLevel, $message, $cause = null)
+    {
+        $now = date('Y-m-d H:i:s', time());
+
+        fwrite($this->fp, '[' . $now . '] [' . $this->processName . ':' . $this->pid . '] ' . $this->prefixes[$logLevel] . $message . "\n");
+        fflush($this->fp);
+    }
 }

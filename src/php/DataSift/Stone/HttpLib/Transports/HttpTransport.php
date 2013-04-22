@@ -1,23 +1,45 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Copyright (c) 2011-present Mediasift Ltd
+ * All rights reserved.
  *
- * PHP Version 5.3
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * This software is the intellectual property of MediaSift Ltd., and is covered
- * by retained intellectual property rights, including copyright.
- * Distribution of this software is strictly forbidden under the terms of this license.
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *   * Neither the names of the copyright holders nor the names of his
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone/HttpLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
- * @copyright 2011 MediaSift Ltd.
- * @license   http://mediasift.com/licenses/internal MediaSift Internal License
- * @version   SVN: $Revision: 2496 $
- * @link      http://www.mediasift.com
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
-
 namespace DataSift\Stone\HttpLib\Transports;
 
 use Exception;
@@ -30,13 +52,13 @@ use DataSift\Stone\HttpLib\HttpClientResponse;
  * Base class for supporting all of the different connection types to a HTTP
  * server
  *
- * @category Libraries
- * @package  Stone
- * @author   Stuart Herbert <stuart.herbert@datasift.com>
- * @license  http://mediasift.com/licenses/internal MediaSift Internal License
- * @link     http://www.mediasift.com
+ * @category  Libraries
+ * @package   Stone/HttpLib
+ * @author    Stuart Herbert <stuart.herbert@datasift.com>
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
-
 abstract class HttpTransport
 {
     /**
@@ -256,8 +278,6 @@ abstract class HttpTransport
      * This is here for exotic transports (like web sockets) to override when
      * they need to do something funky
      *
-     * @param Context $context
-     *     the *only* global state that we're allowed to use
      * @param HttpClientRequest $request
      *     the request that the user wants to send
      *     we add any additional headers to the request object
@@ -300,9 +320,11 @@ abstract class HttpTransport
      * Read the very first line back that we get back from the HTTP server
      * after making a request
      *
-     * @param resource $socket the network socket to the remote server
+     * @param HttpClientConnection $connection
+     *        the raw connection to read from
      * @param HttpClientResponse $response
-     * @return type
+     *        the response for us to record into
+     * @return int|null the HTTP status code that we get
      */
     protected function readResponseLine(HttpClientConnection $connection, HttpClientResponse $response)
     {
@@ -310,7 +332,7 @@ abstract class HttpTransport
         if (!$connection->isConnected())
         {
             $response->addError("readResponseLine", "not connected");
-            return false;
+            return null;
         }
 
         // we are expecting statusLine
@@ -400,6 +422,13 @@ abstract class HttpTransport
         // do nothing by default :)
     }
 
+    /**
+     * close the connection
+     *
+     * @param  HttpClientConnection $connection
+     *         the connection to close
+     * @return void
+     */
     public function close(HttpClientConnection $connection)
     {
         // do nothing by default

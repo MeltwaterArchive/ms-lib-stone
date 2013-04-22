@@ -1,34 +1,58 @@
 <?php
 
 /**
- * Stone - A PHP Library
+ * Copyright (c) 2011-present Mediasift Ltd
+ * All rights reserved.
  *
- * PHP Version 5.3
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * This software is the intellectual property of MediaSift Ltd., and is covered
- * by retained intellectual property rights, including copyright.
- * Distribution of this software is strictly forbidden under the terms of this license.
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *   * Neither the names of the copyright holders nor the names of his
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone/ComparisonLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
- * @copyright 2011 MediaSift Ltd.
- * @license   http://mediasift.com/licenses/internal MediaSift Internal License
- * @version   SVN: $Revision: 2496 $
- * @link      http://www.mediasift.com
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
+
+namespace DataSift\Stone\ComparisonLib;
 
 /**
  * Compares strings against various PHP data types
  *
- * @category Libraries
- * @package  Stone
- * @author   Stuart Herbert <stuart.herbert@datasift.com>
- * @license  http://mediasift.com/licenses/internal MediaSift Internal License
- * @link     http://www.mediasift.com
+ * @category  Libraries
+ * @package   Stone/ComparisonLib
+ * @author    Stuart Herbert <stuart.herbert@datasift.com>
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
-namespace DataSift\Stone\ComparisonLib;
-
 class StringComparitor extends ComparitorBase
 {
 	// ==================================================================
@@ -37,6 +61,12 @@ class StringComparitor extends ComparitorBase
 	//
 	// ------------------------------------------------------------------
 
+	/**
+	 * is the data that we're examining a string, or convertable to a
+	 * string?
+	 *
+	 * @return ComparisonResult
+	 */
 	public function isExpectedType()
 	{
 		// keep track of what happened
@@ -133,9 +163,13 @@ class StringComparitor extends ComparitorBase
 
 		// success - the endings are different
 		return $result;
-
 	}
 
+	/**
+	 * is the data that we're examining a hexadecimal string of some kind?
+	 *
+	 * @return ComparisonResult
+	 */
 	public function isHash()
 	{
 		// do we have a non-empty string to start off with?
@@ -188,6 +222,11 @@ class StringComparitor extends ComparitorBase
 		return $result;
 	}
 
+	/**
+	 * does our string NOT contain valid JSON?
+	 *
+	 * @return ComparisonResult
+	 */
 	public function isNotValidJson()
 	{
 		// does our string contain valid JSON?
@@ -215,11 +254,25 @@ class StringComparitor extends ComparitorBase
 		return $this->isExpectedType();
 	}
 
+	/**
+	 * currently not implemented
+	 *
+	 * @param  string $regex
+	 *         the PCRE regex to test against
+	 * @return ComparisonResult
+	 */
 	public function matchesRegex($regex)
 	{
 
 	}
 
+	/**
+	 * currently not implemented
+	 *
+	 * @param  string $regex
+	 *         the PCRE regex to test against
+	 * @return ComparisonResult
+	 */
 	public function doesNotMatchRegex($regex)
 	{
 

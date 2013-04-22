@@ -34,40 +34,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/HttpLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\ObjectLib;
+namespace DataSift\Stone\ConfigLib;
 
 use DataSift\Stone\ExceptionsLib\Exxx_Exception;
 
 /**
- * Exception for when attempt made to access a property that does not exist
+ * Exception for when we're unable to connect to a (possibly remote) HTTP
+ * server
  *
  * @category  Libraries
- * @package   Stone/ObjectLib
+ * @package   Stone/HttpLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_NoSuchProperty extends Exxx_Exception
+class E5xx_HttpConnectFailed extends Exxx_Exception
 {
 	/**
 	 * constructor
 	 *
-	 * @param string $class
-	 *        name of the class where the property does not exist
-	 * @param string $property
-	 *        name of the property that does not exist
+	 * @param HttpAddress|string $address
+	 *        the URL that we could not connect to
+	 * @param string $errorMsg
+	 *        the error message when we tried to connect
 	 */
-	public function __construct($class, $property)
-	{
-		$msg = "No such property: " . $property . " on instance of class: " . $class;
-		parent::__construct(500, $msg, $msg);
-	}
+    public function __construct($address, $errorMsg)
+    {
+    	$msg = "Cannot connect to '{$address}'; error message is: '{$errorMsg}'";
+        parent::__construct(500, $msg, $msg);
+    }
 }

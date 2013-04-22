@@ -1,21 +1,44 @@
 <?php
 
 /**
- * Stone
+ * Copyright (c) 2011-present Mediasift Ltd
+ * All rights reserved.
  *
- * PHP Version 5.3
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * This software is the intellectual property of MediaSift Ltd., and is covered
- * by retained intellectual property rights, including copyright.
- * Distribution of this software is strictly forbidden under the terms of this license.
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *   * Neither the names of the copyright holders nor the names of his
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone
+ * @package   Stone/HttpLib
  * @author    Stuart Herbert <stuart.herbert@datasift.com>
- * @copyright 2011 MediaSift Ltd.
- * @license   http://mediasift.com/licenses/internal MediaSift Internal License
- * @version   SVN: $Revision: 2496 $
- * @link      http://www.mediasift.com
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
 
 namespace DataSift\Stone\HttpLib;
@@ -30,13 +53,13 @@ use DataSift\Stone\HttpLib\Transports\HttpDefaultTransport;
 /**
  * Low-level connection to a HTTP server
  *
- * @category Libraries
- * @package  Stone
- * @author   Stuart Herbert <stuart.herbert@datasift.com>
- * @license  http://mediasift.com/licenses/internal MediaSift Internal License
- * @link     http://www.mediasift.com
+ * @category  Libraries
+ * @package   Stone/HttpLib
+ * @author    Stuart Herbert <stuart.herbert@datasift.com>
+ * @copyright 2011-present Mediasift Ltd www.datasift.com
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://datasift.github.io/stone
  */
-
 class HttpClientConnection
 {
     /**
@@ -65,19 +88,22 @@ class HttpClientConnection
     /**
      * Connect to the given URL
      *
-     * @param HttpClientRequest $request
-     * @param int $timeout
-     * @return boolean did we successfully connect?
+     * @param HttpAddress address
+     *        the URL to connect to
+     * @param float $timeout
+     *        how long to wait before timing out the connection attempt
+     * @return void
      */
     public function connect(HttpAddress $address, $timeout = 5.0)
     {
         // timers!
         //var_dump('>> CONNECTING');
         $wrapper = new LegacyErrorCatcher();
-        $callback = function($hostname, $port)
+        $errno  = 0;
+        $errstr = '';
+        $callback = function($hostname, $port) use($errno, $errstr, $timeout)
         {
-            return fsockopen($hostname, $port);
-
+            return fsockopen($hostname, $port, $errno, $errstr, $timeout);
         };
 
         $microStart = microtime(true);
@@ -89,21 +115,16 @@ class HttpClientConnection
         {
             // well, that did not go well
             // var_dump($e->getMessage());
+            throw new E5xx_HttpConnectFailed($address, $e->getMessage());
         }
         $microEnd = microtime(true);
         //var_dump('>> CONNECTED');
-
-        // log some stats
-        // $context->stats->timing('connect.open', $microEnd - $microStart);
 
         // what happened?
         if (!is_resource($this->socket))
         {
             // connection failed
-            // log it
-            // $context->stats->increment('connect.failed');
-            // $context->stats->timing('connect.close', $microEnd - $microStart);
-            return false;
+            throw new E5xx_HttpConnectFailed($address, $errstr);
         }
 
         // if we get here, we have a successful connection
@@ -115,12 +136,19 @@ class HttpClientConnection
         // set our own operations to timeout
         $this->timeout = (float)$timeout;
 
+        // remember how long the connection took
         $this->connectStart = $microStart;
         $this->connectEnd   = $microEnd;
 
-        return true;
+        // all done
     }
 
+    /**
+     * keep reading from the socket (throwing away whatever we read) until
+     * the server closes the socket
+     *
+     * @return void
+     */
     public function waitForServerClose()
     {
         if (!$this->isConnected())
@@ -221,6 +249,14 @@ class HttpClientConnection
         return feof($this->socket);
     }
 
+    /**
+     * write data to the TCP socket, forcing a flush() on the socket
+     * after writing is complete
+     *
+     * @param  string $data
+     *         the data to write
+     * @return void
+     */
     public function send($data)
     {
         // do we have a socket to send to?
