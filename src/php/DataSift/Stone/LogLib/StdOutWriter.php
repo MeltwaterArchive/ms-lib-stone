@@ -75,7 +75,7 @@ class StdOutWriter extends LogWriter
     public function init($processName, $pid)
     {
         parent::init($processName, $pid);
-        $this->openStderr();
+        $this->openStdout();
     }
 
     /**
