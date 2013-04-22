@@ -150,9 +150,11 @@ abstract class BaseConfigLoader
     {
         $this->defaultConfigFilePaths = array(
             $topDir,
-            $topDir . '/etc/',
+            $topDir . '/etc',
             $topDir . '/src/etc',
-            "/etc/{$this->appName}/"
+            $topDir . '/src/main/etc',
+            $topDir . '/src/main/config',
+            "/etc/{$this->appName}"
         );
     }
 
@@ -347,7 +349,7 @@ abstract class BaseConfigLoader
             $searchedPaths[] = $filename;
 
             // build up the full filename
-            $filename .= $configName;
+            $filename .= '/' . $configName;
 
             // does it exist?
             if (file_exists($filename)) {
