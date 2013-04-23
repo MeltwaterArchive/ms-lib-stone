@@ -64,6 +64,18 @@ class SubProcess
 	protected $pid = null;
 
 	/**
+	 * constructor
+	 *
+	 * registers a shutdown handler to make sure we always clean up
+	 * after ourselves
+	 */
+	public function __construct()
+	{
+		// make sure we stop our subprocess
+		register_shutdown_function(array($this, "stopChildProcess"));
+	}
+
+	/**
 	 * get the process ID of the child process
 	 *
 	 * @return int|null
