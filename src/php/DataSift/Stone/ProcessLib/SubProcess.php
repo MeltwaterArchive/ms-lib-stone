@@ -43,7 +43,7 @@
 
 namespace DataSift\Stone\ProcessLib;
 
-use DataSift\LogLib\Log;
+use DataSift\Stone\LogLib\Log;
 
 /**
  * represents a single sub-process that we have started
@@ -123,7 +123,7 @@ class SubProcess
 		}
 
 		// is the process currently running?
-		if (!posix_kill($this->pid)) {
+		if (!posix_kill($this->pid, 0)) {
 			// no - so forget its process ID
 			$this->pid = null;
 
