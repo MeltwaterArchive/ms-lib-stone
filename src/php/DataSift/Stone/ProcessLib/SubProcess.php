@@ -194,6 +194,23 @@ class SubProcess
 		// stopped
 		$this->resetPid();
 
+		// find a list of all the child processes
+		$output = '';
+		exec("ps -ef | awk '\$3 == '{$pid}' { print \$2 }'", $output, $returnCode);
+		if ($returnCode) {
+			// no awk available?
+		}
+
+		foreach ($output as $childProcessId) {
+			$this->killProcess($childProcessId);
+		}
+
+		// now, kill off the process we started
+		$this->killProcess($pid);
+	}
+
+	protected function killProcess($pid)
+	{
 		// tell the process to terminate
 		Log::write(Log::LOG_DEBUG, "sending SIGTERM to pid '{$pid}'");
 		posix_kill($pid, SIGTERM);
