@@ -91,6 +91,16 @@ class BooleanComparitor extends ComparitorBase
 	// ------------------------------------------------------------------
 
 	/**
+	  * is this boolean a real boolean?
+      *
+      * @return ComparisonResult
+      */
+    public function isBoolean()
+    {
+		return $this->isExpectedType();
+	}
+
+	/**
 	 * is this boolean 'true'?
 	 *
 	 * @return ComparisonResult
