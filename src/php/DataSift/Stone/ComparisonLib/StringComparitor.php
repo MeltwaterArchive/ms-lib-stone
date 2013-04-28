@@ -179,7 +179,7 @@ class StringComparitor extends ComparitorBase
 		}
 
 		// let's make sure it is a hash
-		$match = preg_match("/^[A-Za-z0-9]+$/", $this->value);
+		$match = preg_match("/^[A-Fa-f0-9]+$/", $this->value);
 		if (!$match) {
 			$result->setHasFailed("valid hex string", $this->value);
 			return $result;
