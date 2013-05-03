@@ -141,6 +141,7 @@ class HttpClientConnection
         $this->connectEnd   = $microEnd;
 
         // all done
+		return true;
     }
 
     /**
