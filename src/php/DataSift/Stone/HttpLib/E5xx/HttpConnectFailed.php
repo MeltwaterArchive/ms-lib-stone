@@ -41,7 +41,7 @@
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\ConfigLib;
+namespace DataSift\Stone\HttpLib;
 
 use DataSift\Stone\ExceptionsLib\Exxx_Exception;
 
