@@ -211,7 +211,7 @@ class ObjectComparitor extends ComparitorBase
 
 		// does the attribute exist?
 		if (!isset($this->value->$attribute)) {
-			$result->setHasFailed("attribute '{$attribute}' exists, not with value '{$value}'", "attribute does not exist");
+			// no, it does not
 			return $result;
 		}
 
