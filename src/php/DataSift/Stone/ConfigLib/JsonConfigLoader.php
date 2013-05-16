@@ -70,9 +70,9 @@ class JsonConfigLoader extends BaseConfigLoader implements ConfigLoader
      *        the location where the app is installed, or the folder
      *        where the app's github checkout can be found
      */
-    public function __construct($appName, $topDir)
+    public function __construct($appName, $topDir, $searchDirs)
     {
-        parent::__construct($appName, $topDir, 'json');
+        parent::__construct($appName, $topDir, $searchDirs, 'json');
     }
 
     /**

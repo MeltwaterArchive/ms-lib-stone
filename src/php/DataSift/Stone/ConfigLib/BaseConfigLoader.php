@@ -103,13 +103,15 @@ abstract class BaseConfigLoader
      *        the INSTALL_PREFIX of your app, or the top of your source
      *        tree
      *
-     *        the config loaders will look in the following places
-     *        for your app's default config files (in this order):
+     *        the config loaders will combine this with the $searchDirs
+     *        list to produce the list of locations to search:
      *
      *        {$topDir}
-     *        {$topDir}/etc/
-     *        {$topDir}/src/etc
-     *        /etc/{$appName}/
+     *        {$topDir}/each($searchDirs)
+     *        /etc/{$appName}
+     *
+     * @param array $searchDirs
+     *        a list of the locations to look inside for config files
      *
      * @param string $configSuffix
      *        the filename suffix to use for config files
@@ -120,7 +122,7 @@ abstract class BaseConfigLoader
      *
      *        {$appName}.{$configSuffix}
      */
-    public function __construct($appName, $topDir, $configSuffix)
+    public function __construct($appName, $topDir, $searchDirs, $configSuffix)
     {
         // remember the name of the app we're loading configs for
         $this->appName = $appName;
@@ -131,7 +133,7 @@ abstract class BaseConfigLoader
 
         // setup our list of directories to search for the app's
         // default config file
-        $this->initDefaultConfigFilePaths($topDir);
+        $this->initDefaultConfigFilePaths($topDir, $searchDirs);
 
         // work out what the basename (the filename with no path) of
         // our default config file should be
@@ -146,16 +148,18 @@ abstract class BaseConfigLoader
      *         the location that our app is running from
      * @return void
      */
-    protected function initDefaultConfigFilePaths($topDir)
+    protected function initDefaultConfigFilePaths($topDir, $searchDirs = array())
     {
-        $this->defaultConfigFilePaths = array(
-            $topDir,
-            $topDir . '/etc',
-            $topDir . '/src/etc',
-            $topDir . '/src/main/etc',
-            $topDir . '/src/main/config',
-            "/etc/{$this->appName}"
-        );
+        // we always look in the top folder first
+        $this->defaultConfigFilePaths = array($topDir);
+
+        // add in additional, user-specified folders to search
+        foreach ($searchDirs as $searchDir) {
+            $this->defaultConfigFilePaths[] = $topDir . '/' . $searchDir;
+        }
+
+        // finally, look for any globally-installed config file
+        $this->defaultConfigFilePaths[] = "/etc/{$this->appName}";
     }
 
     /**
