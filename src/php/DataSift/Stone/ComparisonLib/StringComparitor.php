@@ -196,6 +196,25 @@ class StringComparitor extends ComparitorBase
 		return $result;
 	}
 
+	public function isUuid()
+	{
+		// do we have a non-empty string to start off with?
+		$result = $this->isNotEmpty();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// let's make sure it is a hash
+		$match = preg_match("/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/", $this->value);
+		if (!$match) {
+			$result->setHasFailed("valid UUID-format hex string", $this->value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
 	/**
 	 * does our string contain valid JSON?
 	 *
