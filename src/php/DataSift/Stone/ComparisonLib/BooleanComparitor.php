@@ -72,7 +72,7 @@ class BooleanComparitor extends ComparitorBase
 		$result = new ComparisonResult();
 
 		// is it _really_ a boolean?
-		if (!is_boolean($this->value)) {
+		if (!is_bool($this->value)) {
 			$result->setHasFailed("boolean", gettype($this->value));
 			return $result;
 		}
