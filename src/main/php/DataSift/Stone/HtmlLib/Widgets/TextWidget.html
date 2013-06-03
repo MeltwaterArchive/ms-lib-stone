@@ -1,6 +1,0 @@
-<div class="control-group">
-    <label class="control-label" for="<?= $widget->name ?>"><?= $widget->label ?>:</label>
-    <div class="controls">
-        <input type="text" name="<?= $widget->name ?>" style="width: 220px; height: 18px" <?= $widget->getRequiredAttr() ?> value="<?= $app->post->getHtmlData($widget->name) ?>">
-    </div>
-</div>

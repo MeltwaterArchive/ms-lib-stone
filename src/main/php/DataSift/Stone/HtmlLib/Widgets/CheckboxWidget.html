@@ -1,6 +1,0 @@
-<div class="control-group">
-    <label class="control-label" for="<?= $widget->name ?>"><?= $widget->label ?>:</label>
-    <div class="controls">
-        <input type="checkbox" name="<?= $widget->name ?>" value="ON" <?= $widget->getRequiredAttr() ?> <?= $app->post->getHtmlData($widget->name) ? "checked" : "" ?>></input>
-    </div>
-</div>
