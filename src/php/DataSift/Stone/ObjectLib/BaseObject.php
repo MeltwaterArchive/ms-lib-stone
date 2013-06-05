@@ -496,4 +496,21 @@ class BaseObject extends stdClass
     {
         throw new E5xx_NoSuchProperty(get_class($this), $property);
     }
+
+    /**
+     * magic method, called when a BaseObject is cloned
+     *
+     * our default behaviour is to perform a deep clone
+     *
+     * @return void
+     */
+    public function __clone()
+    {
+        // deep-clone!
+        foreach ($this as $key => $val) {
+            if (is_object($val) || is_array($val)) {
+                $this->$key = unserialize(serialize($val));
+            }
+        }
+    }
 }
