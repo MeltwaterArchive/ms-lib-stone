@@ -43,6 +43,7 @@
 
 namespace DataSift\Stone\ConfigLib;
 
+use DirectoryIterator;
 use stdClass;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 
@@ -253,6 +254,56 @@ abstract class BaseConfigLoader
         $config->mergeFrom($newConfig);
 
         // all done
+    }
+
+    public function getListOfAdditionalConfigFiles()
+    {
+        // the list that we will return
+        $additionalFiles = array();
+
+        foreach ($this->defaultConfigFilePaths as $path) {
+            // skip folders that don't exist
+            if (!is_dir($path)) {
+                continue;
+            }
+
+            // make a list of the matching files
+            foreach (new DirectoryIterator($path) as $fileInfo) {
+                // skip over directories
+                if (!$fileInfo->isFile()) {
+                    continue;
+                }
+
+                $filename = $fileInfo->getFilename();
+                $basename = basename($filename, '.' . $this->configSuffix);
+
+                // skip over anything starting with a '.'
+                if (substr($basename, 0, 1) == '.') {
+                    continue;
+                }
+
+                // skip over our default config file
+                if ($basename == $this->configFileBasename) {
+                    continue;
+                }
+
+                if ($fileInfo->getExtension() == $this->configSuffix) {
+                    $additionalFiles[] = $basename;
+                }
+            }
+        }
+
+        // at this point, we have a list of additional config files that
+        // we can load for the caller
+        //
+        // let's get the list into some semblance of order
+        sort($additionalFiles);
+
+        // remove any duplicates
+        $additionalFiles = array_unique($additionalFiles);
+
+        // all done
+        return $additionalFiles;
     }
 
     /**
