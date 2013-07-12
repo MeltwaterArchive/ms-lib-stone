@@ -271,7 +271,7 @@ class BaseObject extends stdClass
         foreach ($src as $key => $value)
         {
             // do we have a convertable object?
-            if (is_object($value) && $object instanceof stdClass)
+            if (is_object($value) && $value instanceof stdClass)
             {
                 // yes - convert it
                 $return[$key] = $this->convertObject($value);
