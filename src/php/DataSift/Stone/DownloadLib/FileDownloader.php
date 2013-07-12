@@ -88,8 +88,40 @@ class FileDownloader
         // create the path if it doesn't exist
         $this->createDestinationIfRequired($toPath);
 
-        $file = file_get_contents($from);
-        return file_put_contents($to, $file);
+        // remove anything that's .part as it's incomplete
+        $writingName = $to.'.part';
+
+        // download it
+        $this->downloadFile($from, $writingName);
+
+        // rename it once we're done
+        rename($writingName, $to);
+
+        // is it a zip file? If so, unzip it!
+        // then, remove the .zip file
+        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
+        if ($fileInfo->file($to) == "application/zip"){
+            $this->unzipFile($to, $toPath);
+            unlink($to);
+        }
+    }
+
+    /**
+     * actually download the file
+     *
+     * @var string $from The path to download from
+     * @var string $to   The path to save to
+     */
+    private function downloadFile($from, $to)
+    {
+        $fromHandle = fopen($from, "rb");
+        $toHandle = fopen($to, "wb");
+
+        while (!feof($fromHandle)) {
+            fwrite($toHandle, fread($fromHandle, 8192));
+        }
+        fclose($fromHandle);
+        fclose($toHandle);
     }
 
     /**
@@ -108,7 +140,25 @@ class FileDownloader
         }
 
         return true;
-
     }
 
- }
+    /**
+     * create the destination folder if it does not exist
+     *
+     * @var string
+     */
+    private function unzipFile($file, $extractTo)
+    {
+
+        $zipArchive = new \ZipArchive();
+        $result = $zipArchive->open($file);
+        if ($result === TRUE) {
+            $zipArchive ->extractTo($extractTo);
+            $zipArchive ->close();
+            return true;
+        } else {
+            throw new E5xx_CouldNotUnzipFile($file);
+        }
+    }
+
+}
