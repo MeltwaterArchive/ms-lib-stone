@@ -34,7 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
@@ -43,19 +43,17 @@
 
 namespace DataSift\Stone\FileLib;
 
-use DataSift\Stone\ExceptionsLib\Exxx_Exception;
-
 /**
  * Exception for when we cannot find a file
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_FileNotFound extends Exxx_Exception
+class E5xx_FileNotFound extends Exception
 {
     /**
      * constructor
@@ -64,7 +62,7 @@ class E5xx_FileNotFound extends Exxx_Exception
      */
     public function __construct($path)
     {
-        $msg = "Could not find folder: " . $path;
+        $msg = "Could not find file: " . $path;
         parent::__construct(500, $msg, $msg);
     }
 }

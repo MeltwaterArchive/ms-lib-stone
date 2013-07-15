@@ -43,6 +43,8 @@
 
 namespace DataSift\Stone\DownloadLib;
 
+use DataSift\Stone\ExceptionsLib\Exxx_Exception;
+
 /**
  * Base exception for any exceptions thrown from DownloadLib
  *
@@ -53,7 +55,7 @@ namespace DataSift\Stone\DownloadLib;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class Exception extends \Exception
+class Exception extends Exxx_Exception
 {
     
 }

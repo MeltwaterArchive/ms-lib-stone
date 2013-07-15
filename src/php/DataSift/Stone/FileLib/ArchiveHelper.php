@@ -107,10 +107,6 @@ class ArchiveHelper
         }
 
         $extractFunction = static::$supportedArchives[$mimeType];
-        if (!$extractFunction){
-            var_dump($extractFunction);die;
-        }
-
         static::$extractFunction($archive, $target);
 
         return true;

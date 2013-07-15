@@ -86,10 +86,10 @@ class FileDownloader
             $toPath = dirname($toPath);
         }
 
-        // create he path
+        // create the path
         FileHelper::mkdir($toPath);
 
-        // remove anything that's .part as it's incomplete
+        // write to <filename>.part to show in progress downloads
         $writingName = $to.'.part';
 
         // download it
