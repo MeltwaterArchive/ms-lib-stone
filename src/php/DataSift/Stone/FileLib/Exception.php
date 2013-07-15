@@ -34,94 +34,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\DownloadLib;
-
-use DataSift\Stone\FileLib\FileHelper;
-use DataSift\Stone\FileLib\ArchiveHelper;
+namespace DataSift\Stone\FileLib;
 
 /**
- * A helper class used to download files to disk
+ * Base exception for any exceptions thrown from FileLib
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class FileDownloader
+class Exception extends \Exception
 {
-
-    /**
-     * constructor.
-     */
-    public function __construct()
-    {
-    }
-
-    /**
-     * download a file to a specific location
-     *
-     * @var string $from The path to download from
-     * @var string $to The path to save the file to
-     */
-    public function download($from, $to = null)
-    {
-        if (!$to) {
-            $to = basename($from);
-        }
-
-        // we're assuming here that paths end in a /
-        // and if it's not a /, it's the filename to 
-        // write, so dirname it away
-        $toPath = $to;
-        if (substr($toPath, -1) != "/"){
-            $toPath = dirname($toPath);
-        }
-
-        // create he path
-        FileHelper::mkdir($toPath);
-
-        // remove anything that's .part as it's incomplete
-        $writingName = $to.'.part';
-
-        // download it
-        $this->downloadFile($from, $writingName);
-
-        // rename it once we're done
-        FileHelper::rename($writingName, $to);
-
-        // is it an archive? If so, extract it!
-        // then, remove the archive file
-        if (ArchiveHelper::isArchive($to)){
-            ArchiveHelper::extract($to, $toPath);
-            FileHelper::unlink($to);
-        }
-    }
-
-    /**
-     * actually download the file
-     *
-     * @var string $from The path to download from
-     * @var string $to   The path to save to
-     */
-    private function downloadFile($from, $to)
-    {
-        $fromHandle = fopen($from, "rb");
-        $toHandle = fopen($to, "wb");
-
-        while (!feof($fromHandle)) {
-            fwrite($toHandle, fread($fromHandle, 8192));
-        }
-        fclose($fromHandle);
-        fclose($toHandle);
-    }
-
+    
 }

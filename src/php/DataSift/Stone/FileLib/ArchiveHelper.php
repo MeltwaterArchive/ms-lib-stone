@@ -34,94 +34,108 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\DownloadLib;
+namespace DataSift\Stone\FileLib;
 
-use DataSift\Stone\FileLib\FileHelper;
-use DataSift\Stone\FileLib\ArchiveHelper;
+use DataSift\Stone\FileLib\E5xx_InvalidArchive;
 
 /**
- * A helper class used to download files to disk
+ * A helper class used to manage archives
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class FileDownloader
+class ArchiveHelper
 {
+
+    protected static $supportedArchives = array(
+        "application/zip" => "unzip"
+    );
 
     /**
      * constructor.
      */
-    public function __construct()
+    private function __construct()
     {
     }
 
     /**
-     * download a file to a specific location
+     * Check if a path is an archive
      *
-     * @var string $from The path to download from
-     * @var string $to The path to save the file to
+     * @var string $path The path to the archive
+     * @var string $type The type of archive we're expecting
      */
-    public function download($from, $to = null)
+    public static function isArchive($path, $type=null)
     {
-        if (!$to) {
-            $to = basename($from);
+        if (!file_exists($path)){
+            throw new E5xx_FileNotFound($path);
         }
 
-        // we're assuming here that paths end in a /
-        // and if it's not a /, it's the filename to 
-        // write, so dirname it away
-        $toPath = $to;
-        if (substr($toPath, -1) != "/"){
-            $toPath = dirname($toPath);
+        $fileInfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $fileInfo->file($path);
+
+        if ($type){
+            return $mimeType == $type;
         }
 
-        // create he path
-        FileHelper::mkdir($toPath);
-
-        // remove anything that's .part as it's incomplete
-        $writingName = $to.'.part';
-
-        // download it
-        $this->downloadFile($from, $writingName);
-
-        // rename it once we're done
-        FileHelper::rename($writingName, $to);
-
-        // is it an archive? If so, extract it!
-        // then, remove the archive file
-        if (ArchiveHelper::isArchive($to)){
-            ArchiveHelper::extract($to, $toPath);
-            FileHelper::unlink($to);
-        }
+        $supported = array_keys(static::$supportedArchives);
+        return in_array($mimeType, $supported);
     }
 
     /**
-     * actually download the file
+     * extract an archive
      *
-     * @var string $from The path to download from
-     * @var string $to   The path to save to
+     * @var string
      */
-    private function downloadFile($from, $to)
+    public static function extract($archive, $target)
     {
-        $fromHandle = fopen($from, "rb");
-        $toHandle = fopen($to, "wb");
+        $fileInfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $fileInfo->file($archive);
 
-        while (!feof($fromHandle)) {
-            fwrite($toHandle, fread($fromHandle, 8192));
+        if (!static::isArchive($archive)){
+            throw new E5xx_InvalidArchive($archive, $mimeType);
         }
-        fclose($fromHandle);
-        fclose($toHandle);
+
+        $extractFunction = static::$supportedArchives[$mimeType];
+        if (!$extractFunction){
+            var_dump($extractFunction);die;
+        }
+
+        static::$extractFunction($archive, $target);
+
+        return true;
     }
+
+    /**
+     * unzip the archive
+     *
+     * @var string
+     */
+    private static function unzip($file, $target)
+    {
+        $zipArchive = new \ZipArchive();
+        $result = $zipArchive->open($file);
+        if ($result === TRUE) {
+            $zipArchive ->extractTo($target);
+            $zipArchive ->close();
+            return true;
+        } else {
+            throw new E5xx_CouldNotUnzipFile($file);
+        }
+
+        return true;
+    }
+
+
 
 }

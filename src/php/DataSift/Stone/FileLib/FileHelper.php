@@ -34,94 +34,112 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\DownloadLib;
+namespace DataSift\Stone\FileLib;
 
-use DataSift\Stone\FileLib\FileHelper;
-use DataSift\Stone\FileLib\ArchiveHelper;
+use DataSift\Stone\FileLib\E5xx_CouldNotCreateFolder;
+use DataSift\Stone\FileLib\E5xx_CouldNotDeleteFolder;
+use DataSift\Stone\FileLib\E5xx_FolderNotFound;
+use DataSift\Stone\FileLib\E5xx_CouldNotDeleteFile;
+use DataSift\Stone\FileLib\E5xx_CouldNotRenameFile;
+use DataSift\Stone\FileLib\E5xx_FileNotFound;
 
 /**
- * A helper class used to download files to disk
+ * A helper class used to manage files on disk
  *
  * @category  Libraries
- * @package   Stone/DownloadLib
+ * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class FileDownloader
+class FileHelper
 {
 
     /**
      * constructor.
      */
-    public function __construct()
+    private function __construct()
     {
     }
 
     /**
-     * download a file to a specific location
+     * create the destination folder if it does not exist
      *
-     * @var string $from The path to download from
-     * @var string $to The path to save the file to
+     * @var string
      */
-    public function download($from, $to = null)
+    public static function mkdir($path)
     {
-        if (!$to) {
-            $to = basename($from);
+        if (file_exists($path)){
+            return true;
         }
 
-        // we're assuming here that paths end in a /
-        // and if it's not a /, it's the filename to 
-        // write, so dirname it away
-        $toPath = $to;
-        if (substr($toPath, -1) != "/"){
-            $toPath = dirname($toPath);
+        if (!mkdir($path, 0755, true)){
+            throw new E5xx_CouldNotCreateFolder($path);
         }
 
-        // create he path
-        FileHelper::mkdir($toPath);
-
-        // remove anything that's .part as it's incomplete
-        $writingName = $to.'.part';
-
-        // download it
-        $this->downloadFile($from, $writingName);
-
-        // rename it once we're done
-        FileHelper::rename($writingName, $to);
-
-        // is it an archive? If so, extract it!
-        // then, remove the archive file
-        if (ArchiveHelper::isArchive($to)){
-            ArchiveHelper::extract($to, $toPath);
-            FileHelper::unlink($to);
-        }
+        return true;
     }
 
     /**
-     * actually download the file
+     * remove the target folder
      *
-     * @var string $from The path to download from
-     * @var string $to   The path to save to
+     * @var string
      */
-    private function downloadFile($from, $to)
+    public static function rmdir($path)
     {
-        $fromHandle = fopen($from, "rb");
-        $toHandle = fopen($to, "wb");
-
-        while (!feof($fromHandle)) {
-            fwrite($toHandle, fread($fromHandle, 8192));
+        if (!file_exists($path)){
+            throw new E5xx_FolderNotFound($path);
         }
-        fclose($fromHandle);
-        fclose($toHandle);
+
+        if (!rmdir($path)){
+            throw new E5xx_CouldNotDeleteFolder($path);
+        }
+
+        return true;
+    }
+
+    /**
+     * remove the target folder
+     *
+     * @var string
+     */
+    public static function unlink($path)
+    {
+        if (!file_exists($path)){
+            throw new E5xx_FileNotFound($path);
+        }
+
+        if (!unlink($path)){
+            throw new E5xx_CouldNotDeleteFile($path);
+        }
+
+        return true;
+    }
+
+    /**
+     * rename a file
+     *
+     * @var string
+     */
+    public static function rename($from, $to)
+    {
+        if (!file_exists($from)){
+            throw new E5xx_FileNotFound($from);
+        }
+
+        if (!rename($from, $to)){
+            throw new E5xx_CouldNotRenameFile($from, $to);
+        }
+
+        return true;
     }
 
 }

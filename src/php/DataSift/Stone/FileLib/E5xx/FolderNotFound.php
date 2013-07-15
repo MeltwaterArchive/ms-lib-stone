@@ -41,12 +41,12 @@
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\DownloadLib;
+namespace DataSift\Stone\FileLib;
 
 use DataSift\Stone\ExceptionsLib\Exxx_Exception;
 
 /**
- * Exception for when we cannot create a required folder
+ * Exception for when we cannot find a folder
  *
  * @category  Libraries
  * @package   Stone/DownloadLib
@@ -55,18 +55,16 @@ use DataSift\Stone\ExceptionsLib\Exxx_Exception;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_CouldNotCreateFolder extends Exxx_Exception
+class E5xx_FolderNotFound extends Exxx_Exception
 {
     /**
      * constructor
      *
-     * @param string $method
-     *        name of the PHP method that has not been implemented.
-     *        Use the built-in __METHOD__ constant.
+     * @param string $path The path that does not exist
      */
     public function __construct($path)
     {
-        $msg = "Could not create folder: " . $path;
+        $msg = "Could not find folder: " . $path;
         parent::__construct(500, $msg, $msg);
     }
 }

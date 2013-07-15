@@ -41,13 +41,12 @@
  * @link      http://datasift.github.io/stone
  */
 
-namespace DataSift\Stone\DownloadLib;
+namespace DataSift\Stone\FileLib;
 
-use DataSift\Stone\FileLib\FileHelper;
-use DataSift\Stone\FileLib\ArchiveHelper;
+use DataSift\Stone\ExceptionsLib\Exxx_Exception;
 
 /**
- * A helper class used to download files to disk
+ * Exception for when we cannot create a required folder
  *
  * @category  Libraries
  * @package   Stone/DownloadLib
@@ -56,72 +55,16 @@ use DataSift\Stone\FileLib\ArchiveHelper;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class FileDownloader
+class E5xx_CouldNotCreateFolder extends Exxx_Exception
 {
-
     /**
-     * constructor.
-     */
-    public function __construct()
-    {
-    }
-
-    /**
-     * download a file to a specific location
+     * constructor
      *
-     * @var string $from The path to download from
-     * @var string $to The path to save the file to
+     * @param string $path The path that couldn't be created
      */
-    public function download($from, $to = null)
+    public function __construct($path)
     {
-        if (!$to) {
-            $to = basename($from);
-        }
-
-        // we're assuming here that paths end in a /
-        // and if it's not a /, it's the filename to 
-        // write, so dirname it away
-        $toPath = $to;
-        if (substr($toPath, -1) != "/"){
-            $toPath = dirname($toPath);
-        }
-
-        // create he path
-        FileHelper::mkdir($toPath);
-
-        // remove anything that's .part as it's incomplete
-        $writingName = $to.'.part';
-
-        // download it
-        $this->downloadFile($from, $writingName);
-
-        // rename it once we're done
-        FileHelper::rename($writingName, $to);
-
-        // is it an archive? If so, extract it!
-        // then, remove the archive file
-        if (ArchiveHelper::isArchive($to)){
-            ArchiveHelper::extract($to, $toPath);
-            FileHelper::unlink($to);
-        }
+        $msg = "Could not create folder: " . $path;
+        parent::__construct(500, $msg, $msg);
     }
-
-    /**
-     * actually download the file
-     *
-     * @var string $from The path to download from
-     * @var string $to   The path to save to
-     */
-    private function downloadFile($from, $to)
-    {
-        $fromHandle = fopen($from, "rb");
-        $toHandle = fopen($to, "wb");
-
-        while (!feof($fromHandle)) {
-            fwrite($toHandle, fread($fromHandle, 8192));
-        }
-        fclose($fromHandle);
-        fclose($toHandle);
-    }
-
 }
