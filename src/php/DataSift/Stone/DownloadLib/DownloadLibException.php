@@ -55,7 +55,7 @@ use DataSift\Stone\ExceptionsLib\Exxx_Exception;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class Exception extends Exxx_Exception
+class DownloadLibException extends Exxx_Exception
 {
     
 }
