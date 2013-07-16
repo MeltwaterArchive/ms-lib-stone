@@ -44,6 +44,8 @@
 namespace DataSift\Stone\FileLib;
 
 use DataSift\Stone\FileLib\E5xx_InvalidArchive;
+use finfo;
+use ZipArchive;
 
 /**
  * A helper class used to manage archives
@@ -81,7 +83,7 @@ class ArchiveHelper
             throw new E5xx_FileNotFound($path);
         }
 
-        $fileInfo = new \finfo(FILEINFO_MIME_TYPE);
+        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $fileInfo->file($path);
 
         if ($type){
@@ -119,7 +121,7 @@ class ArchiveHelper
      */
     private static function unzip($file, $target)
     {
-        $zipArchive = new \ZipArchive();
+        $zipArchive = new ZipArchive();
         $result = $zipArchive->open($file);
         if ($result === TRUE) {
             $zipArchive ->extractTo($target);

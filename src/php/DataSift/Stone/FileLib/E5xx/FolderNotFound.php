@@ -53,7 +53,7 @@ namespace DataSift\Stone\FileLib;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class E5xx_FolderNotFound extends Exception
+class E5xx_FolderNotFound extends FileLibException
 {
     /**
      * constructor

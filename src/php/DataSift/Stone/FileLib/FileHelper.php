@@ -50,6 +50,9 @@ use DataSift\Stone\FileLib\E5xx_CouldNotDeleteFile;
 use DataSift\Stone\FileLib\E5xx_CouldNotRenameFile;
 use DataSift\Stone\FileLib\E5xx_FileNotFound;
 
+use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
+use DataSift\Stone\ExceptionsLib\E5xx_EngineError;
+
 /**
  * A helper class used to manage files on disk
  *
@@ -81,7 +84,12 @@ class FileHelper
             return true;
         }
 
-        if (!mkdir($path, 0755, true)){
+        try {
+            $legacyErrorCatcher = new LegacyErrorCatcher;
+            $legacyErrorCatcher->callUserFuncArray(function() use ($path){
+                mkdir($path, 0755, true);
+            });
+        } catch (E5xx_EngineError $e){
             throw new E5xx_CouldNotCreateFolder($path);
         }
 
@@ -99,7 +107,12 @@ class FileHelper
             throw new E5xx_FolderNotFound($path);
         }
 
-        if (!rmdir($path)){
+        try {
+            $legacyErrorCatcher = new LegacyErrorCatcher;
+            $legacyErrorCatcher->callUserFuncArray(function() use ($path){
+                rmdir($path);
+            });
+        } catch (E5xx_EngineError $e){
             throw new E5xx_CouldNotDeleteFolder($path);
         }
 
@@ -117,7 +130,12 @@ class FileHelper
             throw new E5xx_FileNotFound($path);
         }
 
-        if (!unlink($path)){
+        try {
+            $legacyErrorCatcher = new LegacyErrorCatcher;
+            $legacyErrorCatcher->callUserFuncArray(function() use ($path){
+                unlink($path);
+            });
+        } catch(E5xx_EngineError $e){
             throw new E5xx_CouldNotDeleteFile($path);
         }
 
@@ -135,7 +153,12 @@ class FileHelper
             throw new E5xx_FileNotFound($from);
         }
 
-        if (!rename($from, $to)){
+        try {
+            $legacyErrorCatcher = new LegacyErrorCatcher;
+            $legacyErrorCatcher->callUserFuncArray(function() use ($from, $to){
+                rename($from, $to);
+            });
+        } catch (E5xx_EngineError $e) {
             throw new E5xx_CouldNotRenameFile($from, $to);
         }
 
