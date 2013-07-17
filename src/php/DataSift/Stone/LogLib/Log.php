@@ -246,8 +246,17 @@ class Log
             throw new E5xx_BadLogWriter($writerClass);
         }
 
+        if (function_exists('posix_getpid'))
+        {
+            $pid = posix_getpid();
+        }
+        else
+        {
+            $pid = getmypid();
+        }
+
         self::$writer = new $writerClass;
-        self::$writer->init($processName, posix_getpid());
+        self::$writer->init($processName, $pid);
     }
 
     /**
