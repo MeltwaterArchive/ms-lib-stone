@@ -85,6 +85,30 @@ class Log
     const LOG_DEBUG = 8;
     const LOG_TRACE = 9;
 
+    private static $namesToLevels = array(
+        "EMERGENCY" => self::LOG_EMERGENCY,
+        "ALERT"     => self::LOG_ALERT,
+        "CRITICAL"  => self::LOG_CRITICAL,
+        "ERROR"     => self::LOG_ERROR,
+        "WARNING"   => self::LOG_WARNING,
+        "NOTICE"    => self::LOG_NOTICE,
+        "INFO"      => self::LOG_INFO,
+        "DEBUG"     => self::LOG_DEBUG,
+        "TRACE"     => self::LOG_TRACE,
+    );
+
+    private static $levelsToNames = array(
+        self::LOG_EMERGENCY => "EMERGENCY",
+        self::LOG_ALERT     => "ALERT",
+        self::LOG_CRITICAL  => "CRITICAL",
+        self::LOG_ERROR     => "ERROR",
+        self::LOG_WARNING   => "WARNING",
+        self::LOG_NOTICE    => "NOTICE",
+        self::LOG_INFO      => "INFO",
+        self::LOG_DEBUG     => "DEBUG",
+        self::LOG_TRACE     => "TRACE",
+    );
+
     /**
      * initialise the logging engine
      *
@@ -181,23 +205,22 @@ class Log
      */
     static protected function setLogMaskFromConfig($config)
     {
-        $possibleMasks = array (
-            "LOG_EMERGENCY" => self::LOG_EMERGENCY,
-            "LOG_ALERT"     => self::LOG_ALERT,
-            "LOG_CRITICAL"  => self::LOG_CRITICAL,
-            "LOG_ERROR"     => self::LOG_ERROR,
-            "LOG_WARNING"   => self::LOG_WARNING,
-            "LOG_NOTICE"    => self::LOG_NOTICE,
-            "LOG_INFO"      => self::LOG_INFO,
-            "LOG_DEBUG"     => self::LOG_DEBUG,
-            "LOG_TRACE"     => self::LOG_TRACE,
-        );
-
         // convert the JSON-encoded object into an array
         $mask = array();
-        foreach ($possibleMasks as $levelName => $logLevel)
+        foreach (self::$namesToLevels as $levelName => $logLevel)
         {
-            $mask[$logLevel] = $config->$levelName;
+            // try it without the LOG_ prefix first
+            if (isset($config->$levelName)) {
+                $mask[$logLevel] = $config->$levelName;
+            }
+            // fall back to the older LOG_ prefixed names
+            else if (isset($config->{'LOG_' . $levelName})) {
+                $mask[$logLevel] = $config->{'LOG_' . $levelName};
+            }
+            // if no match, assume the level is disabled
+            else {
+                $mask[$logLevel] = false;
+            }
         }
 
         // set our mask as the live mask
@@ -225,5 +248,59 @@ class Log
 
         self::$writer = new $writerClass;
         self::$writer->init($processName, posix_getpid());
+    }
+
+    /**
+     * convert a human-readable name into an internal log level
+     *
+     * @param  string $name
+     *         the human-readable name of the log level
+     * @return int
+     *         the log-level to use for Log::Log
+     */
+    static public function getLevelFromName($name)
+    {
+        if (isset(self::$namesToLevels[$name]))
+        {
+            return self::$namesToLevels[$name];
+        }
+
+        return null;
+    }
+
+    /**
+     * generate a logging mask given a minimum level to log against
+     *
+     * @param  string|int $level
+     *         the minimum log level to enable
+     * @return stdClass
+     *         the logging mask to use with Log::init()
+     */
+    static public function getMaskForMinLevel($level)
+    {
+        // our return value
+        $mask = array();
+
+        // convert from string to int if required
+        if (is_string($level))
+        {
+            $level = static::getLevelFromName($level);
+        }
+
+        // a simple way to fill out the mask
+        for ($i = self::LOG_EMERGENCY; $i <= self::LOG_TRACE; $i++)
+        {
+            if ($i <= $level)
+            {
+                $mask[self::$levelsToNames[$i]] = true;
+            }
+            else
+            {
+                $mask[self::$levelsToNames[$i]] = false;
+            }
+        }
+
+        // all done
+        return (object)$mask;
     }
 }
