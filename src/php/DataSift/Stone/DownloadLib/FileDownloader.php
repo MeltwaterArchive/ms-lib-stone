@@ -103,7 +103,7 @@ class FileDownloader
 
         // is it an archive? If so, extract it!
         // then, remove the archive file
-        if (ArchiveHelper::isArchive($to) && !in_array(strtolower(FileHelper::getExtension()), $archive_blacklist)) {
+        if (ArchiveHelper::isArchive($to) && !in_array(strtolower(FileHelper::getExtension($to)), $archive_blacklist)) {
             ArchiveHelper::extract($to, $toPath);
             FileHelper::unlink($to);
         }
