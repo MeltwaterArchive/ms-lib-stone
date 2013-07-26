@@ -79,7 +79,7 @@ class FileDownloader
         }
 
         // we're assuming here that paths end in a /
-        // and if it's not a /, it's the filename to 
+        // and if it's not a /, it's the filename to
         // write, so dirname it away
         $toPath = $to;
         if (substr($toPath, -1) != "/"){
@@ -98,9 +98,12 @@ class FileDownloader
         // rename it once we're done
         FileHelper::rename($writingName, $to);
 
+        // a list of file extensions to avoid extracting
+        $archive_blacklist = array('jar');
+
         // is it an archive? If so, extract it!
         // then, remove the archive file
-        if (ArchiveHelper::isArchive($to)){
+        if (ArchiveHelper::isArchive($to) && !in_array(strtolower(FileHelper::getExtension()), $archive_blacklist)) {
             ArchiveHelper::extract($to, $toPath);
             FileHelper::unlink($to);
         }
