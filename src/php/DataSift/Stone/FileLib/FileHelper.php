@@ -59,6 +59,7 @@ use DataSift\Stone\ExceptionsLib\E5xx_EngineError;
  * @category  Libraries
  * @package   Stone/FileLib
  * @author    Michael Heap <michael.heap@datasift.com>
+ * @author    Stuart Herbert <stuart.herbert@datasift.com>
  * @copyright 2011-present Mediasift Ltd www.datasift.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
@@ -165,4 +166,24 @@ class FileHelper
         return true;
     }
 
+    /**
+     * get the extension from a filename
+     *
+     * @param  string $path
+     *         the filename to examine
+     * @return string|null
+     *         the filename's extension, or NULL if there is no extension
+     */
+    public static function getExtension($path)
+    {
+        $parts = explode('.', basename($path));
+
+        // was there a file extension?
+        if (count($parts) > 1) {
+            return end($parts);
+        }
+
+        // no, there wasn't
+        return null;
+    }
 }

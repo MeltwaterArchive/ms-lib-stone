@@ -59,7 +59,6 @@ use ZipArchive;
  */
 class ArchiveHelper
 {
-
     protected static $supportedArchives = array(
         "application/zip" => "unzip"
     );
