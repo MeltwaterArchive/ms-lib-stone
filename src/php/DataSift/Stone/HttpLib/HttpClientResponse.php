@@ -168,6 +168,13 @@ class HttpClientResponse
     public $mustClose = false;
 
     /**
+     * do we need to combine chunks into $this->body?
+     *
+     * @var boolean
+     */
+    public $combineChunks = true;
+
+    /**
      * What type of HTTP response are we representing?
      * @param int $type
      */
@@ -399,5 +406,26 @@ class HttpClientResponse
     public function getBody()
     {
         return $this->body;
+    }
+
+    public function combineChunksIfRequired()
+    {
+        // do nothing if we haven't had chunked data
+        if (!$this->transferIsChunked()) {
+            // nothing to do
+            return;
+        }
+
+        // do nothing if we've explicitly been asked not to
+        if (!$this->combineChunks) {
+            return;
+        }
+
+        // combine the chunks into a single body
+        //
+        // this can be risky, as we don't know how much memory we're
+        // consuming, but it's necessary for those sites that use
+        // chunked transport even for request/reply queries
+        $this->body = implode('', $this->chunks);
     }
 }
