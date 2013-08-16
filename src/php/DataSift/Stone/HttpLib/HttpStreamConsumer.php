@@ -111,6 +111,7 @@ class HttpStreamConsumer
         {
             // lets get our requests made
             $client = new HttpClient();
+            $client->combineChunks = false;
             $bytesRead = 0;
 
             // we make the request

@@ -148,6 +148,9 @@ class HttpClient
             $this->transport->readContent($this->connection, $response);
         }
 
+        // now that we have our content, do we have chunks to recombine?
+        $response->combineChunksIfRequired();
+
         // return the results
         return $response;
     }
@@ -200,6 +203,9 @@ class HttpClient
         {
             $this->transport->readContent($this->connection, $response);
         }
+
+        // now that we have our content, do we have chunks to recombine?
+        $response->combineChunksIfRequired();
 
         // return the results
         return $response;
@@ -261,6 +267,9 @@ class HttpClient
             $this->transport->readContent($this->connection, $response);
         }
 
+        // now that we have our content, do we have chunks to recombine?
+        $response->combineChunksIfRequired();
+
         // return the results
         return $response;
     }
@@ -320,6 +329,9 @@ class HttpClient
         {
             $this->transport->readContent($this->connection, $response);
         }
+
+        // now that we have our content, do we have chunks to recombine?
+        $response->combineChunksIfRequired();
 
         // return the results
         return $response;
