@@ -363,4 +363,31 @@ class StringComparitor extends ComparitorBase
 		// success - the starts are different
 		return $result;
 	}
+
+	/**
+	* Given an array of possible values, is the current value in the list of possibilities?
+	*
+	* @param  array $expected the array/list of possible values $this->value could be equal to in
+	* order to pass
+	* @return ComparisonResult
+	*/
+	public function isIn($expected = array())
+	{
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		if(count($expected) == 0){
+			return $result;
+		}
+
+		foreach ($expected as $possibleValue) {
+			if($this->value == $possibleValue){
+				$result->setHasPassed();
+				break;
+			}
+		}
+		return $result;
+	}	
 }
