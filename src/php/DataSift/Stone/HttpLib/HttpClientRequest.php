@@ -381,17 +381,7 @@ class HttpClientRequest
      */
     public function getEncodedBody()
     {
-        $return = '';
-        foreach ($this->body as $key => $value)
-        {
-            if (strlen($return) > 0)
-            {
-                $return .= '&';
-            }
-            $return .= urlencode($key) . '=' . urlencode($value);
-        }
-
-        return $return;
+        return http_build_query($this->body);
     }
 
     // =========================================================================
