@@ -91,7 +91,7 @@ class HttpDefaultTransport extends HttpTransport
             // var_dump($body);
 
             // keep count of how much data we've read
-            $response->bytesRead += strlen($body);
+            $response->bytesRead = strlen($body);
         }
         while (!$connection->feof() && ($expectedLen && $response->bytesRead < $expectedLen));
 
