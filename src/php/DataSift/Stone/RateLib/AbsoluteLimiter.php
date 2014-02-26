@@ -90,4 +90,9 @@ class AbsoluteLimiter
 
 		return false;
 	}
+
+	public function getUnitsSeen()
+	{
+		return $this->unitsSeen;
+	}
 }
