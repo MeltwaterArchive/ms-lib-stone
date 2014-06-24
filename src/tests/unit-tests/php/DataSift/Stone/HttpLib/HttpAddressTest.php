@@ -78,6 +78,7 @@ class HttpAddressTest extends PHPUnit_Framework_Testcase
 	/**
 	 * @covers DataSift\Stone\HttpLib\HttpAddress::__construct
 	 * @covers DataSift\Stone\HttpLib\HttpAddress::setAddress
+	 * @covers DataSift\Stone\HttpLib\E4xx_InvalidUrl::__construct
 	 *
 	 * @expectedException DataSift\Stone\HttpLib\E4xx_InvalidUrl
 	 */
