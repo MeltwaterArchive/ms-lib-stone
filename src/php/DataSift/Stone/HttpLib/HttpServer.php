@@ -70,6 +70,17 @@ class HttpServer
      */
     protected $listeningPort;
 
+    // import the correct line ending to use in HTTP headers
+    use HttpLineEndings;
+
+    /**
+     * constructor
+     */
+    public function __construct()
+    {
+        // does nothing for now
+    }
+
     /**
      * Start the HTTP server
      *
@@ -85,13 +96,35 @@ class HttpServer
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if ($this->socket === false)
         {
-            throw new Exception("Unable to create TCP/IP socket; error is " . socket_strerror(socket_last_error($this->socket)));
+            // @codeCoverageIgnoreStart
+            throw new HttpServerCannotStart("Unable to create TCP/IP socket; error is " . socket_strerror(socket_last_error($this->socket)));
+            // @codeCoverageIgnoreEnd
         }
 
-        if (socket_bind($this->socket, '0.0.0.0', $port) === false)
+        // we need to install a dummy error handler, otherwise the
+        // global one will kick in if socket_bind() fails
+        //
+        // this is needed for PHPUnit testing
+        set_error_handler([$this, 'dummyLegacyErrorHandler']);
+        $result = socket_bind($this->socket, '0.0.0.0', $port);
+        restore_error_handler();
+
+        if ($result === false)
         {
-            throw new Exception("Unable to open TCP/IP socket on port $port; error is " . socket_strerror(socket_last_error($this->socket)));
+            throw new E5xx_HttpServerCannotStart("Unable to open TCP/IP socket on port $port; error is " . socket_strerror(socket_last_error($this->socket)));
         }
+    }
+
+    /**
+     * used to work around global error handlers that interfere with the
+     * exceptions we want to throw
+     *
+     * @codeCoverageIgnore
+     * @return void
+     */
+    public function dummyLegacyErrorHandler()
+    {
+        // do nothing
     }
 
     /**
@@ -103,15 +136,66 @@ class HttpServer
      */
     public function waitForRequest()
     {
-        if (socket_listen($this->socket, 1) === false)
-        {
-            throw new Exception("Unable to listen on port " . $this->port . "; error is " . socket_strerror(socket_last_error($this->socket)));
+        // do we actually *have* a socket to listen on?
+        if (!is_resource($this->socket)) {
+            throw new E5xx_HttpServerCannotAccept("Please call HttpServer::startServer() first!");
         }
 
+        // yes we do
+        $this->listenForConnections();
+
+        // wait for an actual connection
+        $requestSocket = $this->acceptInboundConnection();
+
+        // what is the request's first line?
+        return $this->readRequestFromSocket($requestSocket);
+    }
+
+    /**
+     * put our server socket into listen mode
+     *
+     * @return void
+     */
+    protected function listenForConnections()
+    {
+        // we need to install a dummy error handler, otherwise the
+        // global one will kick in if socket_listen() fails
+        //
+        // this is needed for PHPUnit testing
+        set_error_handler([$this, 'dummyLegacyErrorHandler']);
+
+        // socket_listen() can return NULL as well as FALSE
+        $result = socket_listen($this->socket, 1);
+
+        // put the error handler back
+        restore_error_handler();
+
+        // what happened?
+        if (!$result)
+        {
+            throw new E5xx_HttpServerCannotAccept("Unable to listen on port " . $this->listeningPort . "; error is " . socket_strerror(socket_last_error($this->socket)));
+        }
+    }
+
+    /**
+     * wait for an actual inbound connection
+     *
+     * @return resource the socket that the request is on
+     */
+    protected function acceptInboundConnection()
+    {
+        // we need to install a dummy error handler, otherwise the
+        // global one will kick in if socket_accept() fails
+        //
+        // this is needed for PHPUnit testing
+        set_error_handler([$this, 'dummyLegacyErrorHandler']);
         $requestSocket = socket_accept($this->socket);
+        restore_error_handler();
+
+        // what happened?
         if ($requestSocket === false)
         {
-            throw new Exception("Unable to accept incoming TCP/IP connection to port $this->listeningPort; error is " . socket_strerror(socket_last_error($this->socket)));
+            throw new E5xx_HttpServerCannotAccept("Unable to accept incoming TCP/IP connection to port $this->listeningPort; error is " . socket_strerror(socket_last_error($this->socket)));
         }
 
         // mark this socket as blocking, and to hand around until all
@@ -120,83 +204,33 @@ class HttpServer
         $linger = array('l_linger' => 1, 'l_onoff' => 1);
         socket_set_option($requestSocket, SOL_SOCKET, SO_LINGER, $linger);
 
+        // all done
+        return $requestSocket;
+    }
+
+    /**
+     * read the first line from the request socket
+     *
+     * @param  resource $requestSocket
+     *         the socket to read from
+     * @return array(resource, string)
+     *         the $requestSocket, and the string read from the socket
+     */
+    protected function readRequestFromSocket($requestSocket)
+    {
         $request = socket_read($requestSocket, 2048, PHP_NORMAL_READ);
         if ($request === false)
         {
-            throw new Exception("Unable to read from TCP/IP socket; error is " . socket_strerror(socket_last_error($this->socket)));
+            // I can't think of a legit way to make socket_read() fail
+            // at this point for unit testing purposes
+            //
+            // @codeCoverageIgnoreStart
+            throw new E5xx_HttpServerCannotRead("Unable to read from TCP/IP socket; error is " . socket_strerror(socket_last_error($this->socket)));
+            // @codeCoverageIgnoreEnd
         }
 
         // if we get here, we think we have a request
         return array($requestSocket, $request);
-    }
-
-    /**
-     * Tell the client listening on $requestSocket that we are going to send
-     * our response back as HTTP chunks.
-     *
-     * @param socket $requestSocket the socket that the client is listening on
-     * @param string $responseMimeType the mimetype of the data we're going to
-     *               send back
-     * @return mixed the return value from writing to the socket
-     */
-    public function setChunkedResponse($requestSocket, $responseMimeType = 'application/json')
-    {
-        $response = <<<EOS
-HTTP/1.1 200 OK
-Content-Type: $responseMimeType
-Transfer-Encoding: chunked
-Server: Hornet(6.6.6)
-
-
-EOS;
-
-        return socket_write($requestSocket, $response, strlen($response));
-    }
-
-    /**
-     * Write a response to a HTTP stream
-     *
-     * @param socket $requestSocket the socket to write to
-     * @param string $message the response to send
-     * @return mixed false if we could not write to the socket, or the number
-     *         of bytes we have written
-     */
-    public function streamResponse($requestSocket, $message)
-    {
-        // we send three lines ...
-        //
-        // line 1: the length of the message, in hexadecimal
-        // line 2: the message itself
-        // line 3: a blank line
-        //
-        // and if any of the writes fail, we bail
-
-        $returnBytesWritten = 0;
-
-        $tweetSize = strlen($message);
-        $chunkSize = dechex(strlen($tweetSize) + strlen($message) +4) . "\r\n";
-        $bytesWritten = socket_write($requestSocket, $chunkSize, strlen($chunkSize));
-        if ($bytesWritten === false)
-        {
-            return false;
-        }
-        $returnBytesWritten = $bytesWritten;
-
-        $bytesWritten = socket_write($requestSocket, $tweetSize . "\r\n", strlen($tweetSize) + 2);
-        if ($bytesWritten === false)
-        {
-            return false;
-        }
-        $returnBytesWritten += $bytesWritten;
-
-        $bytesWritten = socket_write($requestSocket, $message . "\r\n\r\n", strlen($message) + 4);
-        if ($bytesWritten === false)
-        {
-            return false;
-        }
-        $returnBytesWritten += $bytesWritten;
-
-        return $returnBytesWritten;
     }
 
     /**
