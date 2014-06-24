@@ -144,7 +144,10 @@ class HttpAddress
         $parts = parse_url($addressString);
         if (!is_array($parts))
         {
-            throw new Exception('unable to parse URL');
+            // I can't make parse_url return a non-array
+            // @codeCoverageIgnoreStart
+            throw new E4xx_InvalidUrl($addressString);
+            // @codeCoverageIgnoreEnd
         }
 
         // okay, what do we have?
@@ -159,12 +162,19 @@ class HttpAddress
             'fragment'    => 'fragment'
         );
 
+        $allPartsAreBlank = true;
         foreach ($components as $attribute => $index)
         {
-            if (isset($parts[$index]))
+            if (isset($parts[$index]) && !empty($parts[$index]))
             {
                 $this->$attribute = $parts[$index];
+                $allPartsAreBlank = false;
             }
+        }
+
+        // was the parsed URL entirely blank?
+        if ($allPartsAreBlank) {
+            throw new E4xx_InvalidUrl($addressString);
         }
 
         // fill in the blanks
