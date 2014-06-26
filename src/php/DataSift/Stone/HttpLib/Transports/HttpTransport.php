@@ -66,40 +66,38 @@ abstract class HttpTransport
      */
     const CRLF = "\r\n";
 
-    /**
-     * Send data to our connection as a GET request
-     *
-     * Override this for more exotic transports, such as web sockets
-     *
-     * @param HttpClientConnection $connection
-     *     our network connection to the HTTP server
-     * @param HttpClientRequest $request
-     *     the request that we are sending
-     * @return mixed
-     *     HttpClientResponse on success,
-     *     false if the connection was not open
-     */
-    public function sendGet(HttpClientConnection $connection, HttpClientRequest $request)
+    public function sendRequest(HttpClientConnection $connection, HttpClientRequest $request)
     {
-        // log how many GET requests we have made
-        // $context->stats->increment('request.verb.get');
-
-        // cannot send if we do not have an open socket
-        if (!$connection->isConnected())
-        {
-            return false;
+        // we can't do anything if we're not connected
+        if (!$connection->isConnected()) {
+            throw new E4xx_NoHttpConnection();
         }
 
-        // how quickly did we get the chance to send the first line off?
-        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
-
-        // send the request
-        //var_dump('>> SENDING');
+        // send the first line of our request
         $connection->send($request->getRequestLine() . self::CRLF);
 
-        // send any supporting headers
+        // our potential payload
+        $encodedData = null;
 
+        // prepare any additional headers
+        if ($request->getIsUpload()) {
+            // what content type are we using?
+            if (!$request->hasHeaderCalled('Content-Type'))
+            {
+                $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
+            }
+
+            // are we sending a payload?
+            if (!$request->getIsStream()) {
+                $encodedData = $request->getBody();
+                $request->withExtraHeader('Content-Length', strlen($encodedData));
+            }
+        }
+
+        // now add any headers that are unique to this transport
         $this->addAdditionalHeadersToRequest($request);
+
+        // send any supporting headers
         $headers = $request->getHeadersString();
         if ($headers !== null)
         {
@@ -108,168 +106,23 @@ abstract class HttpTransport
 
         // send empty line to complete request
         $connection->send(self::CRLF);
-        //var_dump('>> SENT');
-
-        // how long did that take?
-        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
     }
 
     /**
-     * Send data to our connection as a POST request
+     * send out the payload of the request
      *
-     * Override this for more exotic transports, such as web sockets
-     *
-     * @param HttpClientConnection $connection
-     *     our network connection to the HTTP server
-     * @param HttpClientRequest $request
-     *     the request that we are sending
-     * @return mixed
-     *     HttpClientResponse on success,
-     *     false if the connection was not open
+     * @param  HttpClientConnection $connection
+     *         our network connection
+     * @param  HttpClientRequest $request
+     *         the request, which includes the payload to send
+     * @return void
      */
-    public function sendPost(HttpClientConnection $connection, HttpClientRequest $request)
+    public function sendBody(HttpClientConnection $connection, HttpClientRequest $request)
     {
-        // log how many GET requests we have made
-        // $context->stats->increment('request.verb.get');
-
-        // cannot send if we do not have an open socket
-        if (!$connection->isConnected())
-        {
-            return false;
-        }
-
-        // how quickly did we get the chance to send the first line off?
-        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
-
-        // send the request
-        //var_dump('>> SENDING');
-        $connection->send($request->getRequestLine() . self::CRLF);
         $encodedData = $request->getBody();
-        if (!$request->hasHeaderCalled('Content-Type'))
-        {
-            $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
+        if ($encodedData !== null) {
+            $connection->sendContent($encodedData);
         }
-        $request->withExtraHeader('Content-Length', strlen($encodedData));
-
-        // send any supporting headers
-        $this->addAdditionalHeadersToRequest($request);
-        $headers = $request->getHeadersString();
-        if ($headers !== null)
-        {
-            $connection->send($headers);
-        }
-
-        // send empty line to complete request
-        $connection->send(self::CRLF);
-        //var_dump('>> SENT');
-
-        $connection->send($encodedData);
-
-        // how long did that take?
-        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
-    }
-
-    /**
-     * Send data to our connection as a PUT request
-     *
-     * Override this for more exotic transports, such as web sockets
-     *
-     * @param HttpClientConnection $connection
-     *     our network connection to the HTTP server
-     * @param HttpClientRequest $request
-     *     the request that we are sending
-     * @return mixed
-     *     HttpClientResponse on success,
-     *     false if the connection was not open
-     */
-    public function sendPut(HttpClientConnection $connection, HttpClientRequest $request)
-    {
-        // log how many GET requests we have made
-        // $context->stats->increment('request.verb.get');
-
-        // cannot send if we do not have an open socket
-        if (!$connection->isConnected())
-        {
-            return false;
-        }
-
-        // how quickly did we get the chance to send the first line off?
-        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
-
-        // send the request
-        //var_dump('>> SENDING');
-        $connection->send($request->getRequestLine() . self::CRLF);
-        $encodedData = $request->getBody();
-        if (!$request->hasHeaderCalled('Content-Type'))
-        {
-            $request->withExtraHeader('Content-Type', 'application/x-www-form-urlencoded');
-        }
-        $request->withExtraHeader('Content-Length', strlen($encodedData));
-
-        // send any supporting headers
-        $this->addAdditionalHeadersToRequest($request);
-        $headers = $request->getHeadersString();
-        if ($headers !== null)
-        {
-            $connection->send($headers);
-        }
-
-        // send empty line to complete request
-        $connection->send(self::CRLF);
-        //var_dump('>> SENT');
-
-        $connection->send($encodedData . self::CRLF);
-
-        // how long did that take?
-        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
-    }
-
-    /**
-     * Send data to our connection as a DELETE request
-     *
-     * Override this for more exotic transports, such as web sockets
-     *
-     * @param HttpClientConnection $connection
-     *     our network connection to the HTTP server
-     * @param HttpClientRequest $request
-     *     the request that we are sending
-     * @return mixed
-     *     HttpClientResponse on success,
-     *     false if the connection was not open
-     */
-    public function sendDelete(HttpClientConnection $connection, HttpClientRequest $request)
-    {
-        // log how many GET requests we have made
-        // $context->stats->increment('request.verb.get');
-
-        // cannot send if we do not have an open socket
-        if (!$connection->isConnected())
-        {
-            return false;
-        }
-
-        // how quickly did we get the chance to send the first line off?
-        // $context->stats->timing('request.firstLineTime', microtime(true) - $connection->connectStart);
-
-        // send the request
-        //var_dump('>> SENDING');
-        $connection->send($request->getRequestLine() . self::CRLF);
-
-        // send any supporting headers
-
-        $this->addAdditionalHeadersToRequest($request);
-        $headers = $request->getHeadersString();
-        if ($headers !== null)
-        {
-            $connection->send($headers);
-        }
-
-        // send empty line to complete request
-        $connection->send(self::CRLF);
-        //var_dump('>> SENT');
-
-        // how long did that take?
-        // $context->stats->timing('request.lastLineTime', microtime(true) - $connection->connectStart);
     }
 
     /**
@@ -294,11 +147,11 @@ abstract class HttpTransport
      * @param HttpClientRequest $request the request that we want a response to
      * @return HttpClientResponse the response we received
      */
-    public function readResponse(HttpClientConnection $connection, HttpClientRequest $request)
+    public function readResponse(HttpClientConnection $connection, HttpClientRequest $request, $timeout = null)
     {
         // now, we need to see what the server said
         $response = new HttpClientResponse($connection);
-        $statusCode = $this->readResponseLine($connection, $response);
+        $statusCode = $this->readResponseLine($connection, $response, $timeout);
 
         // do we think it is safe to read the response headers?
         if (!$response->hasErrors())
@@ -326,7 +179,7 @@ abstract class HttpTransport
      *        the response for us to record into
      * @return int|null the HTTP status code that we get
      */
-    protected function readResponseLine(HttpClientConnection $connection, HttpClientResponse $response)
+    protected function readResponseLine(HttpClientConnection $connection, HttpClientResponse $response, $timeout = null)
     {
         // make sure the socket is valid
         if (!$connection->isConnected())
@@ -336,7 +189,21 @@ abstract class HttpTransport
         }
 
         // we are expecting statusLine
-        $statusLine = $connection->readLine();
+        if ($timeout == null)
+        {
+            $statusLine = $connection->readLine();
+        }
+        else {
+            // if we get here, then we've set a timeout on when the remote
+            // endpoint replies to us
+            //
+            // this is normally used for making sure that 'Expect: 100-continue'
+            // is correctly implemented
+            //
+            // as guidance, cURL (our reference implementation) currently
+            // waits for 1 second for the response to 'Excpect: 100-continue'
+            $statusLine = $connection->readLineWithTimeout($timeout);
+        }
         // var_dump('>> STATUS: ' . $statusLine);
         $response->bytesRead += strlen($statusLine);
         $statusLine = substr($statusLine, 0, -2);
@@ -388,6 +255,32 @@ abstract class HttpTransport
             }
         }
         while (!$connection->feof() && !$headersCompleted);
+    }
+
+    /**
+     * send one or more lines of content to the remote HTTP server
+     *
+     * NOTE: do NOT use this to send HTTP headers!!
+     *
+     * @param  HttpClientConnection $connection
+     *         our connection to the remote server
+     * @param  array|string $payload
+     *         the content to send (MUST BE CRLF terminated)
+     * @return void
+     */
+    abstract public function sendContent(HttpClientConnection $connection, $payload);
+
+    /**
+     * tell the remote HTTP server that we've finished sending content
+     *
+     * @param  HttpClientConnection $connection
+     *         our connection to the remote server
+     * @return boolean
+     *         false if there was no valid connection, true otherwise
+     */
+    public function doneSendingContent(HttpClientConnection $connection)
+    {
+        // do nothing by default
     }
 
     /**

@@ -62,6 +62,45 @@ use DataSift\Stone\HttpLib\HttpClientResponse;
 
 class HttpDefaultTransport extends HttpTransport
 {
+    // ==================================================================
+    //
+    // Support for sending content
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * send one or more lines of content to the remote HTTP server
+     *
+     * NOTE: do NOT use this to send HTTP headers!!
+     *
+     * @param  HttpClientConnection $connection
+     *         our connection to the remote server
+     * @param  array|string $payload
+     *         the content to send (MUST BE CRLF terminated)
+     * @return void
+     */
+    public function sendContent(HttpClientConnection $connection, $payload)
+    {
+        if (!$connection->isConnected()) {
+            return;
+        }
+
+        if (is_array($payload)) {
+            foreach ($payload as $line) {
+                $connection->send($line);
+            }
+        }
+        else {
+            $connection->send($payload);
+        }
+    }
+
+    // ==================================================================
+    //
+    // Support for receiving content
+    //
+    // ------------------------------------------------------------------
+
     /**
      * Read data from the connection
      *

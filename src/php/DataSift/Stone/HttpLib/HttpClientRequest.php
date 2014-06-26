@@ -69,28 +69,56 @@ class HttpClientRequest
     private $httpVerb = 'GET';
 
     /**
-     * The list of headers to send with this request
-     * @var array
-     */
-
-    public $headers = array(
-        'Accept'            => 'text/html,application/xhtml,+xml,application/xml,application/json',
-        'AcceptCharset'     => 'utf-8',
-        'Connection'        => 'keep-alive',
-        'UserAgent'         => 'Hornet/6.6.6 (DataSift Hive) PHP/CLI (Hornet, like wasps only with evil intent)',
-    );
-
-    /**
-     * THe headers to send with this request, as a single string for efficiency
+     * The HTTP transport type to use for this request.
+     *
+     * Valid values are:
+     * - default => HttpDefaultTransport
+     * - chunked => HttpChunkedTransport
+     *
      * @var string
      */
-    private $headersString = null;
+    private $transportType = 'default';
+
+    /**
+     * Do we explicitly want to open a long-lived HTTP stream when
+     * uploading?
+     *
+     * Set this by calling setIsStream()
+     * @var boolean
+     */
+    private $isStream = false;
+
+    /**
+     * Do we want to force chunked-transport for upload (to mimic cURL's
+     * behaviour when the payload is over 1024 bytes in length)?
+     *
+     * Set this by calling setPayloadIsLarge()
+     *
+     * @var boolean
+     */
+    private $considerPayloadLarge = false;
 
     /**
      * the data body to include in the request
      * @var array|string| null
      */
     private $body = array();
+
+    /**
+     * do we want HttpLib to be strict about handling how well the
+     * remote end works with the Expects: header?
+     *
+     * Switch this to FALSE by calling disableStrictExpectsHandling().
+     *
+     * @var boolean
+     */
+    private $strictExpectsHandling = true;
+
+    /**
+     * import our standard HttpHeaders support, which is also used
+     * in the HttpClientResponse
+     */
+    use HttpHeaders;
 
     /**
      * Constructor
@@ -102,7 +130,21 @@ class HttpClientRequest
     public function __construct($address)
     {
         $this->setAddress($address);
+
+        // set our default headers
+        $this->setHeaders([
+            'Accept'        => 'text/html,application/xhtml,+xml,application/xml,application/json',
+            'AcceptCharset' => 'utf-8',
+            'Connection'    => 'keep-alive',
+            'UserAgent'     => 'Hornet/6.6.6 (DataSift Hive) PHP/CLI (Hornet, like wasps only with evil intent)',
+        ]);
     }
+
+    // ==================================================================
+    //
+    // HTTP verb support
+    //
+    // ------------------------------------------------------------------
 
     /**
      * get the HTTP verb that we're going to use when we send this
@@ -116,33 +158,19 @@ class HttpClientRequest
     }
 
     /**
-     * What address are we connecting to?
+     * set the HTTP verb that we're going to use when we send this
+     * request to the HTTP server
      *
-     * @return HttpAddress
-     */
-    public function getAddress()
-    {
-        return $this->address;
-    }
-
-    /**
-     * Set the URL that this request is for
+     * @param string $httpVerb
+     *        a valid HTTP verb
      *
-     * @param mixed $address
-     *      The address for this request. Can be string, can be HttpAddress
+     * @return HttpClientRequest $this
      */
-    public function setAddress($address)
+    public function setHttpVerb($httpVerb)
     {
-        if ($address instanceof HttpAddress)
-        {
-            $this->address = $address;
-        }
-        else
-        {
-            $this->address = new HttpAddress($address);
-        }
+        $this->httpVerb = strtoupper($httpVerb);
 
-        $this->headers['Host'] = $this->address->hostname;
+        return $this;
     }
 
     /**
@@ -161,6 +189,51 @@ class HttpClientRequest
         return $this;
     }
 
+    // ==================================================================
+    //
+    // HTTP address support
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * What address are we connecting to?
+     *
+     * @return HttpAddress
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * Set the URL that this request is for
+     *
+     * @param mixed $address
+     *        The address for this request.
+     *        Can be string, can be HttpAddress.
+     */
+    public function setAddress($address)
+    {
+        if ($address instanceof HttpAddress)
+        {
+            $this->address = $address;
+        }
+        else
+        {
+            $this->address = new HttpAddress($address);
+        }
+
+        $this->setHeader('Host', $this->address->hostname);
+    }
+
+    // ==================================================================
+    //
+    // HTTP Headers API
+    //
+    // this is built on top of the HttpHeaders trait
+    //
+    // ------------------------------------------------------------------
+
     /**
      * Set an extra header to send with this request
      *
@@ -170,10 +243,7 @@ class HttpClientRequest
      */
     public function withExtraHeader($heading, $value)
     {
-        $this->headers[$heading] = $value;
-        $this->headersString = null;
-
-        return $this;
+        return $this->setHeader($heading, $value);
     }
 
     /**
@@ -187,49 +257,14 @@ class HttpClientRequest
      */
     public function withUserAgent($userAgent)
     {
-        $this->headers['UserAgent'] = $userAgent;
-        $this->headersString = null;
-        return $this;
+        return $this->setHeader('UserAgent', $userAgent);
     }
 
-    /**
-     * Return the headers to send to the browser, as a single well-formed string
-     *
-     * @return string
-     */
-    public function getHeadersString()
-    {
-        if (!isset($this->headersString))
-        {
-            $this->headersString = '';
-            foreach ($this->headers as $heading => $value)
-            {
-                $this->headersString .= $heading . ': ' . $value . "\r\n";
-            }
-        }
-
-        return $this->headersString;
-    }
-
-    /**
-     * Do we have the named header already set?
-     *
-     * @param  string $headerName
-     *         the name of the header to check for
-     *
-     * @return boolean
-     *         TRUE if the header already exists
-     *         FALSE if it does not
-     */
-    public function hasHeaderCalled($headerName)
-    {
-        if (isset($this->headers[$headerName]))
-        {
-            return true;
-        }
-
-        return false;
-    }
+    // ==================================================================
+    //
+    // 1st line of request
+    //
+    // ------------------------------------------------------------------
 
     /**
      * Obtain the request line to send to the HTTP server
@@ -374,6 +409,22 @@ class HttpClientRequest
     }
 
     /**
+     * do we have a body for this request?
+     *
+     * @return boolean
+     */
+    public function hasBody()
+    {
+        // do we have anything at all?
+        if (empty($this->body)) {
+            return false;
+        }
+
+        // yes we do
+        return true;
+    }
+
+    /**
      * get the body of the request, encoded for submitting as a POSTed
      * form
      *
@@ -382,6 +433,98 @@ class HttpClientRequest
     public function getEncodedBody()
     {
         return http_build_query($this->body);
+    }
+
+    /**
+     * Is this request an upload, or a download?
+     *
+     * @return boolean
+     */
+    public function getIsUpload()
+    {
+        // these verbs are allowed to upload data
+        if ($this->httpVerb == 'POST' || $this->httpVerb == 'PUT') {
+            return true;
+        }
+
+        // other verbs are not allowed to upload data
+        return false;
+    }
+
+    /**
+     * Is this request for an upload stream?
+     *
+     * @return boolean
+     */
+    public function getIsStream()
+    {
+        return $this->isStream;
+    }
+
+    /**
+     * We want this upload to be forced to be a HTTP stream
+     *
+     * This changes the behaviour of POST and PUT requests only.
+     * For GET requests, it is the remote end that controls whether the
+     * request is a stream or not.
+     */
+    public function setIsStream()
+    {
+        $this->isStream = true;
+        $this->transportType = 'chunked';
+    }
+
+    /**
+     * Does this request want the payload to treated as 'large'?
+     *
+     * By 'large', we mean do we want to force the upload to be encoded
+     * used chunked-transport, to mimic cURL's behaviour?
+     *
+     * @return boolean
+     */
+    public function getIsPayloadLarge()
+    {
+        return $this->considerPayloadLarge;
+    }
+
+    /**
+     * We want this upload to be forced over chunked-transport
+     *
+     * Use this when you want to mimic cURL's behaviour.  We never enable
+     * this by default - that's a policy decision, which is owned by the
+     * caller!
+     */
+    public function setPayloadIsLarge()
+    {
+        $this->considerPayloadLarge = true;
+    }
+
+    /**
+     * We want this upload to mimic cURL's behaviour when the remote
+     * server fails to issue a 100-Continue response in the time allowed
+     *
+     * You should only do this if you have an explicit test case that
+     * needs this behaviour.  Otherwise, stick with our default behaviour
+     * (which is to treat missing 100-Continue responses as an error) so
+     * that your tests do not hide any potential problems in the HTTP
+     * service under test
+     *
+     * @return void
+     */
+    public function disableStrictExpectsHandling()
+    {
+        $this->strictExpectsHandling = false;
+    }
+
+    /**
+     * Do we expect the HttpClient to be strict about the behaviour of
+     * the Expects: header and the 100-Continue response it should trigger?
+     *
+     * @return boolean
+     */
+    public function getStrictExpectsHandling()
+    {
+        return $this->strictExpectsHandling;
     }
 
     // =========================================================================
