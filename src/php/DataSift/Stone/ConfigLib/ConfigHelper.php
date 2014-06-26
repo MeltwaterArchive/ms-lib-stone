@@ -55,7 +55,7 @@ use DataSift\Stone\ObjectLib\BaseObject;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class ConfigLoader
+class ConfigHelper
 {
     /**
      * load a config file from anywhere
@@ -67,7 +67,7 @@ class ConfigLoader
     public function loadConfigFile(BaseObject $config, $filename)
     {
         // get the config
-        $configFile = getConfigFileObjFor($filename);
+        $configFile = $this->getConfigFileObjFor($filename);
         $newConfig  = $configFile->loadConfigFile();
 
         // merge it in

@@ -43,6 +43,9 @@
 
 namespace DataSift\Stone\ConfigLib;
 
+use Exception;
+use stdClass;
+use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
 use DataSift\Stone\ObjectLib\BaseObject;
 
 /**
@@ -89,7 +92,7 @@ abstract class ConfigFile
         {
             throw new E4xx_ConfigFileNotReadable($filename);
         }
-        if (is_string($rawConfig) || empty($rawConfig))
+        if (!is_string($rawConfig) || empty($rawConfig))
         {
             throw new E4xx_InvalidConfigFile($filename, "file is empty");
         }
