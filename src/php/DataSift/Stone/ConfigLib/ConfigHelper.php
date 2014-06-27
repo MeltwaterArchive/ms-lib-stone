@@ -43,6 +43,11 @@
 
 namespace DataSift\Stone\ConfigLib;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RecursiveRegexIterator;
+use RegexIterator;
+
 use DataSift\Stone\ObjectLib\BaseObject;
 
 /**
@@ -143,6 +148,36 @@ class ConfigHelper
 
         $configFile = $this->getConfigFileObjFor($fullFilename);
         $configFile->saveConfigFile($config);
+    }
+
+    /**
+     * find a list of config files in a folder
+     *
+     * @return array
+     */
+    public function getListOfConfigFilesIn($directory, $fileExit)
+    {
+        // does the directory exist?
+        if (!is_dir($directory)) {
+            return [];
+        }
+
+        // use the SPL to do the heavy lifting
+        $dirIter = new RecursiveDirectoryIterator($directory);
+        $recIter = new RecursiveIteratorIterator($dirIter);
+        $regIter = new RegexIterator($recIter, '/^.+\.' . $fileExit . '$/i', RegexIterator::GET_MATCH);
+
+        // what happened?
+        $filenames = [];
+        foreach ($regIter as $match) {
+            $filenames[] = $match[0];
+        }
+
+        // let's get the list into some semblance of order
+        sort($filenames);
+
+        // all done
+        return $filenames;
     }
 
     /**
