@@ -141,7 +141,7 @@ class ConfigHelper
     {
         $fullFilename = $this->getDotFilesFilename($appName, $filename);
 
-        $configFile = $this->getConfigFileObjFor($filename);
+        $configFile = $this->getConfigFileObjFor($fullFilename);
         $configFile->saveConfigFile($config);
     }
 
