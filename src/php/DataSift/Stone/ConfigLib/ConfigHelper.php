@@ -121,7 +121,7 @@ class ConfigHelper
         $fullFilename = $this->getDotFilesFilename($appName, $filename);
 
         $config = new BaseObject();
-        $this->loadConfigFile($config, $filename);
+        $this->loadConfigFile($config, $fullFilename);
         return $config;
     }
 
