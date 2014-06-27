@@ -80,9 +80,11 @@ class JsonConfigFile extends ConfigFile
      */
     public function decodeConfig($rawConfig)
     {
-        $return = @json_decode($rawConfig);
-        if (!$return) {
+        $return = json_decode($rawConfig);
+        if ($return === null) {
             throw new E4xx_InvalidConfigFile($this->filename);
         }
+
+        return $return;
     }
 }
