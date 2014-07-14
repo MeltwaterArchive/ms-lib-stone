@@ -82,7 +82,7 @@ class JsonConfigFile extends ConfigFile
     {
         $return = json_decode($rawConfig);
         if ($return === null) {
-            throw new E4xx_InvalidConfigFile($this->filename);
+            throw new E4xx_InvalidConfigFile($this->filename, "unable to decode JSON");
         }
 
         return $return;
