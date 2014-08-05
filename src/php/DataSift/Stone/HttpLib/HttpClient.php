@@ -80,59 +80,81 @@ class HttpClient
      */
     protected $statsdClient = null;
 
+    // ==================================================================
+    //
+    // Support for making the request
+    //
+    // ------------------------------------------------------------------
+
     /**
      * Make a request to the HTTP server
      *
      * @param HttpClientRequest $request
-     * @return HttpClientResponse
+     * @return HttpClientResponse|HttpStreamClient
      */
     public function newRequest(HttpClientRequest $request)
     {
-        $method = 'new' . ucfirst(strtolower($request->getHttpVerb())) . 'Request';
-        return call_user_func_array(array($this, $method), array($request));
-    }
+        // before anything else, we need to connect to the (possibly)
+        // remote server
+        $this->connection = $this->getConnectionTo($request->getAddress());
 
-    // =========================================================================
-    //
-    // Support for GET requests, possibly ones that stream
-    //
-    // -------------------------------------------------------------------------
+        // pick our transport
+        $this->transport = $this->getInitialTransport($request);
 
-    /**
-     * Make a new GET request to the HTTP server
-     *
-     * NOTE: the connection to the HTTP server will only be closed *if* the
-     *       HTTP server sends a Connection: close header
-     *
-     * @param HttpClientRequest $request the request to make
-     * @return HttpClientResponse what we got back from the HTTP server
-     */
-    public function newGetRequest(HttpClientRequest $request)
-    {
-        // var_dump('>> GET ' . (string)$request->getAddress());
-        // can we connect to the remote server?
-        $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($request->getAddress()))
-        {
-            // could not connect
-            return false;
+        // make the request
+        $response = $this->transport->sendRequest($this->connection, $request);
+
+        // special case - we need a response and then we'll (maybe) send
+        // some more
+        if ($request->getIsUpload() && $request->hasHeaderWithValue('Expect', '100-Continue')) {
+            try {
+                // we need a response back inside 1 second
+                // this mimics the behaviour hard-coded into the
+                // internals of cURL
+                //
+                // all of our testing is based around making sure our
+                // services work well with cURL, because it is the
+                // de-facto HTTP client of many languages
+                $response = $this->transport->readResponse($this->connection, $request, 1);
+            }
+            catch (E5xx_HttpReadTimeout $e) {
+                // at this point, cURL would just send the data anyway
+                //
+                // however, we're much stricter, because we're primarily
+                // a library for use in tests, and we do not want to hide
+                // anything that is potentially a symptom of a problem
+                // in the HTTP service that we are trying to test
+                if ($request->getStrictExpectsHandling()) {
+                    throw new E5xx_100ContinueMissing();
+                }
+            }
+
+            // we *probably* have a response - is it the one we wanted?
+            if (isset($response->statusCode) && ($response->statusCode != 100)) {
+                // no, it isn't what we wanted
+                return $response;
+            }
+
+            // at this point, either the remote end has told us that it is
+            // ready to accept data, or we have decided that we're going
+            // to send the data anyway
+            //
+            // do we have any to send?
+            if ($request->getIsStream()) {
+                // no - we are now a stream
+                return $response;
+            }
+
+            // yes, we do
+            $this->transport->sendBody($this->connection, $request);
         }
+        else {
+            // send the payload too
+            $this->transport->sendBody($this->connection, $request);
 
-        // choose a transport; this may change as we work with the connection
-        if ($request->getAddress()->scheme == 'ws')
-        {
-            $this->transport = new WsTransport();
+            // listen for a response with no timeout
+            $response = $this->transport->readResponse($this->connection, $request);
         }
-        else
-        {
-            $this->transport = new HttpDefaultTransport();
-        }
-
-        // now, send the GET request
-        $this->transport->sendGet($this->connection, $request);
-
-        // listen for an answer
-        $response = $this->transport->readResponse($this->connection, $request);
 
         // at this point, we have read all of the headers sent back to us
         //
@@ -156,186 +178,42 @@ class HttpClient
     }
 
     /**
-     * Make a new POST request to the HTTP server
+     * Use the request to decide which HttpTransport we need to use to
+     * make our request
      *
-     * NOTE: the connection to the HTTP server will only be closed *if* the
-     *       HTTP server sends a Connection: close header
-     *
-     * @param HttpClientRequest $request the request to make
-     * @return HttpClientResponse what we got back from the HTTP server
+     * @param  HttpClientRequest $request
+     * @return HttpTransport
      */
-    public function newPostRequest(HttpClientRequest $request)
+    protected function getInitialTransport(HttpClientRequest $request)
     {
-        // can we connect to the remote server?
-        $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($request->getAddress(), 5))
-        {
-            // could not connect
-            return false;
+        // are we using websockets?
+        $scheme = $request->getAddress()->scheme;
+        if ($scheme == 'ws' || $scheme == 'wss') {
+            return new WsTransport();
         }
 
-        // choose a transport; this may change as we work with the connection
-        if ($request->getAddress()->scheme == 'ws')
-        {
-            $this->transport = new WsTransport();
-        }
-        else
-        {
-            $this->transport = new HttpDefaultTransport();
+        // are we dealing with the general case?
+        if (!$request->getIsUpload()) {
+            // go with the basics, and let the remote end tell us if
+            // things need to change
+            return new HttpDefaultTransport();
         }
 
-        // now, send the POST request
-        $this->transport->sendPost($this->connection, $request);
-
-        // listen for an answer
-        $response = $this->transport->readResponse($this->connection, $request);
-
-        // at this point, we have read all of the headers sent back to us
-        //
-        // do we need to switch transports?
-        if ($response->transferIsChunked())
-        {
-            $this->transport = new HttpChunkedTransport();
+        // special cases start here ...
+        if ($request->getIsStream() || $request->getIsPayloadLarge()) {
+            // the request wants us to use chunked-transport
+            return new HttpChunkedTransport();
         }
 
-        // now, do we have any valid content to read?
-        if ($response->type && !$response->hasErrors())
-        {
-            $this->transport->readContent($this->connection, $response);
-        }
-
-        // now that we have our content, do we have chunks to recombine?
-        $response->combineChunksIfRequired();
-
-        // return the results
-        return $response;
+        // at this point, we've run out of special cases to consider
+        return new HttpDefaultTransport();
     }
 
-    // =========================================================================
+    // ==================================================================
     //
-    // Support for PUT requests, possibly ones that stream
+    // Support for reading / writing with the remote server
     //
-    // -------------------------------------------------------------------------
-
-    /**
-     * Make a new PUT request to the HTTP server
-     *
-     * NOTE: the connection to the HTTP server will only be closed *if* the
-     *       HTTP server sends a Connection: close header
-     *
-     * @param HttpClientRequest $request the request to make
-     * @return HttpClientResponse what we got back from the HTTP server
-     */
-    public function newPutRequest(HttpClientRequest $request)
-    {
-        // var_dump('>> PUT ' . (string)$request->getAddress());
-        // can we connect to the remote server?
-        $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($request->getAddress(), 5))
-        {
-            // could not connect
-            return false;
-        }
-
-        // choose a transport; this may change as we work with the connection
-        if ($request->getAddress()->scheme == 'ws')
-        {
-            $this->transport = new WsTransport();
-        }
-        else
-        {
-            $this->transport = new HttpDefaultTransport();
-        }
-
-        // now, send the GET request
-        $this->transport->sendPut($this->connection, $request);
-
-        // listen for an answer
-        $response = $this->transport->readResponse($this->connection, $request);
-
-        // at this point, we have read all of the headers sent back to us
-        //
-        // do we need to switch transports?
-        if ($response->transferIsChunked())
-        {
-            $this->transport = new HttpChunkedTransport();
-        }
-
-        // now, do we have any valid content to read?
-        if ($response->type && !$response->hasErrors())
-        {
-            $this->transport->readContent($this->connection, $response);
-        }
-
-        // now that we have our content, do we have chunks to recombine?
-        $response->combineChunksIfRequired();
-
-        // return the results
-        return $response;
-    }
-
-    // =========================================================================
-    //
-    // Support for DELETE requests, possibly ones that stream
-    //
-    // -------------------------------------------------------------------------
-
-    /**
-     * Make a new DELETE request to the HTTP server
-     *
-     * NOTE: the connection to the HTTP server will only be closed *if* the
-     *       HTTP server sends a Connection: close header
-     *
-     * @param HttpClientRequest $request the request to make
-     * @return HttpClientResponse what we got back from the HTTP server
-     */
-    public function newDeleteRequest(HttpClientRequest $request)
-    {
-        // var_dump('>> DELETE ' . (string)$request->getAddress());
-        // can we connect to the remote server?
-        $this->connection = new HttpClientConnection();
-        if (!$this->connection->connect($request->getAddress(), 5))
-        {
-            // could not connect
-            return false;
-        }
-
-        // choose a transport; this may change as we work with the connection
-        if ($request->getAddress()->scheme == 'ws')
-        {
-            $this->transport = new WsTransport();
-        }
-        else
-        {
-            $this->transport = new HttpDefaultTransport();
-        }
-
-        // now, send the GET request
-        $this->transport->sendDelete($this->connection, $request);
-
-        // listen for an answer
-        $response = $this->transport->readResponse($this->connection, $request);
-
-        // at this point, we have read all of the headers sent back to us
-        //
-        // do we need to switch transports?
-        if ($response->transferIsChunked())
-        {
-            $this->transport = new HttpChunkedTransport();
-        }
-
-        // now, do we have any valid content to read?
-        if ($response->type && !$response->hasErrors())
-        {
-            $this->transport->readContent($this->connection, $response);
-        }
-
-        // now that we have our content, do we have chunks to recombine?
-        $response->combineChunksIfRequired();
-
-        // return the results
-        return $response;
-    }
+    // ------------------------------------------------------------------
 
     /**
      * Read more data from an existing HTTP connection
@@ -368,21 +246,44 @@ class HttpClient
      * @param string $data
      *      The data to send
      */
-    public function sendData($data)
+    public function sendContent($data)
     {
         // do we have an open connection?
-        if (!isset($this->connection))
+        if (!isset($this->connection) || !$this->connection->isConnected())
         {
-            return null;
-        }
-        if (!$this->connection->isConnected())
-        {
-            // we are not connected
-            return null;
+            throw new E4xx_NoHttpConnection();
         }
 
         // send the data
-        $this->connection->send($data);
+        $this->transport->sendContent($this->connection, $data);
+    }
+
+    public function doneSendingContent()
+    {
+        if (!$this->connection || !$this->connection->isConnected()) {
+            throw new E4xx_NoHttpConnection();
+        }
+
+        $this->transport->doneSendingContent($this->connection);
+
+        // TODO: get any response from the server
+
+        // all done
+        $this->connection->waitForServerClose();
+        $this->connection = null;
+    }
+
+    public function closeStream()
+    {
+        if (!$this->connection || !$this->connection->isConnected()) {
+            throw new E4xx_NoHttpConnection();
+        }
+
+        $this->transport->doneSendingContent($this->connection);
+
+        // all done
+        $this->connection->waitForServerClose();
+        $this->connection = null;
     }
 
     // =========================================================================
@@ -403,6 +304,42 @@ class HttpClient
         }
 
         return $this->connection->isConnected();
+    }
+
+    /**
+     * create a HttpClientConnection to a HTTP server
+     *
+     * if we already have a connection to this server, we will reuse it
+     *
+     * @param  HttpAddress $address
+     * @return HttpClientConnection
+     */
+    protected function getConnectionTo(HttpAddress $address)
+    {
+        // are we already connected?
+        if ($this->connection instanceof HttpClientConnection) {
+            if ($this->connection->isConnectedTo($address)) {
+                // we're already connected
+                return $this->connection;
+            }
+
+            // if we get here, we're connected to somewhere else
+            // we need to close that connection so that we can
+            // start a new one
+            $this->disconnect();
+        }
+
+        // if we get here, we need to make a new connection
+        $connection = new HttpClientConnection();
+        if (!$connection->connect($address, 5))
+        {
+            throw new E5xx_HttpConnectFailed((string)$address, "error information not available");
+        }
+
+        // at this point, we have successfully connected to $address,
+        // and we are ready to send our request to the (possibly) remote
+        // HTTP server!
+        return $connection;
     }
 
     /**

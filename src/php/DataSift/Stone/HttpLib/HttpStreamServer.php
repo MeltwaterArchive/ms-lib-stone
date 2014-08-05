@@ -43,11 +43,8 @@
 
 namespace DataSift\Stone\HttpLib;
 
-use DataSift\Stone\ApiLib\ApiHelpers;
-
 /**
- * Very simple support for redirecting the user's browser to a different
- * location. For use inside controllers.
+ * A simple HTTP stream server for use in data publishers
  *
  * @category  Libraries
  * @package   Stone/HttpLib
@@ -56,82 +53,72 @@ use DataSift\Stone\ApiLib\ApiHelpers;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class HttpRedirector
+
+class HttpStreamServer extends HttpServer
 {
     /**
-     * Issue a 302 redirect, and then quit
+     * Tell the client listening on $requestSocket that we are going to send
+     * our response back as HTTP chunks.
      *
-     * @codeCoverageIgnore
-     * @param  string $url
-     *         the URL to redirect to
-     * @param  array $params
-     *         any query string params to tack onto the URL
-     * @return void
+     * @param socket $requestSocket the socket that the client is listening on
+     * @param string $responseMimeType the mimetype of the data we're going to
+     *               send back
+     * @return mixed the return value from writing to the socket
      */
-    static public function send_302($url, $params = array())
+    public function setChunkedResponse($requestSocket, $responseMimeType = 'application/json')
     {
-        header('HTTP/1.0 302 Temporarily moved');
-        header('Location: ' . $url . self::convertParamsToQueryString($params));
-        exit(0);
+        $response = "HTTP/1.1 200 OK" . $this->EOL
+                  . "Content-Type: $responseMimeType" . $this->EOL
+                  . "Transfer-Encoding: chunked" . $this->EOL
+                  . "Server: Stone HttpLib(6.6.6)" . $this->EOL
+                  . $this->EOL;
+
+        return socket_write($requestSocket, $response, strlen($response));
     }
 
     /**
-     * Issue a 303 redirect, and then quit
+     * Write a response to a HTTP stream
      *
-     * @codeCoverageIgnore
-     * @param  string $url
-     *         the URL to redirect to
-     * @param  array $params
-     *         any query string params to tack onto the URL
-     * @return void
+     * @param socket $requestSocket the socket to write to
+     * @param string $message the response to send
+     * @return mixed false if we could not write to the socket, or the number
+     *         of bytes we have written
      */
-    static public function send_303($url, $params)
+    public function streamResponse($requestSocket, $message)
     {
-        header('HTTP/1.0 303 See Other');
-        header('Location: ' . $url . self::convertParamsToQueryString($params));
-        exit(0);
-    }
+        // we send three lines ...
+        //
+        // line 1: the length of the message, in hexadecimal
+        // line 2: the message itself
+        // line 3: a blank line
+        //
+        // and if any of the writes fail, we bail
 
-    /**
-     * Convert a set of params into the query string for a URL
-     *
-     * The parameters can either be an array, or an object.
-     *
-     * @param  mixed $params the params to convert
-     * @return string
-     */
-    static protected function convertParamsToQueryString($params)
-    {
-        // just in case we have an object instead of an array
-        $paramsToConvert = ApiHelpers::normaliseParams($params);
+        $returnBytesWritten = 0;
 
-        // do we have any parameters to convert?
-        if (count($paramsToConvert) == 0)
+        $tweetSize = strlen($message);
+        $chunkSize = dechex(strlen($tweetSize) + strlen($message) +4) . "\r\n";
+        $bytesWritten = socket_write($requestSocket, $chunkSize, strlen($chunkSize));
+        if ($bytesWritten === false)
         {
-            // no, we do not
-            return '';
+            return false;
         }
+        $returnBytesWritten = $bytesWritten;
 
-        // encode the parameters individually
-        array_walk($paramsToConvert, array(__CLASS__, 'encodeParam'));
-
-        // flatten the parameters
-        $pairs = array();
-        foreach ($paramsToConvert as $key => $value)
+        $bytesWritten = socket_write($requestSocket, $tweetSize . "\r\n", strlen($tweetSize) + 2);
+        if ($bytesWritten === false)
         {
-            $pairs[] = $key . '=' . $value;
+            return false;
         }
-        return '?' . join('&', $pairs);
-    }
+        $returnBytesWritten += $bytesWritten;
 
-    /**
-     * Callback for array_walk() call
-     *
-     * @param  string &$param the param to be encoded
-     * @return void
-     */
-    static public function encodeParam(&$param)
-    {
-        $param = urlencode($param);
+        $bytesWritten = socket_write($requestSocket, $message . "\r\n\r\n", strlen($message) + 4);
+        if ($bytesWritten === false)
+        {
+            return false;
+        }
+        $returnBytesWritten += $bytesWritten;
+
+        return $returnBytesWritten;
     }
 }

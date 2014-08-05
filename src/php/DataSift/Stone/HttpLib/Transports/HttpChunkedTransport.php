@@ -62,6 +62,77 @@ use DataSift\Stone\LogLib\Log;
  */
 class HttpChunkedTransport extends HttpTransport
 {
+    // ==================================================================
+    //
+    // Support for sending content
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * send one or more lines of content to the remote HTTP server
+     *
+     * NOTE: do NOT use this to send HTTP headers!!
+     *
+     * @param  HttpClientConnection $connection
+     *         our connection to the remote server
+     * @param  array|string $payload
+     *         the content to send
+     * @return void
+     */
+    public function sendContent(HttpClientConnection $connection, $payload)
+    {
+        if (!$connection->isConnected()) {
+            throw new E4xx_NoHttpConnection();
+        }
+
+        if (is_array($payload)) {
+            foreach ($payload as $line) {
+                // send the length of the chunk first
+                $len = strlen($line);
+                $connection->send($len . self::CRLF);
+                if (substr($len, -2, 2) == self::CRLF) {
+                    $connection->send($line);
+                }
+                else {
+                    $connection->send($line . self::CRLF);
+                }
+            }
+        }
+        else {
+            $len = strlen($payload);
+            $connection->send($len . self::CRLF);
+            if (substr($payload, -2, 2) == self::CRLF) {
+                $connection->send($payload);
+            }
+            else {
+                $connection->send($payload . self::CRLF);
+            }
+        }
+    }
+
+    /**
+     * tell the remote HTTP server that we've finished sending content
+     *
+     * @param  HttpClientConnection $connection
+     *         our connection to the remote server
+     * @return boolean
+     *         false if there was no valid connection, true otherwise
+     */
+    public function doneSendingContent(HttpClientConnection $connection)
+    {
+        if (!$connection->isConnected()) {
+            throw new E4xx_NoHttpConnection();
+        }
+
+        $connection->send("0" . self::CRLF);
+    }
+
+    // ==================================================================
+    //
+    // Support for receiving payload data
+    //
+    // ------------------------------------------------------------------
+
     /**
      * Read data from the connection
      *

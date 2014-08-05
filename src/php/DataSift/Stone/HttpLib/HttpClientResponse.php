@@ -102,13 +102,6 @@ class HttpClientResponse
     public $statusMessage;
 
     /**
-     * What headers came back in the response?
-     *
-     * @var array
-     */
-    public $headers = array();
-
-    /**
      * What content came back from the remote HTTP server?
      *
      * We only set the body for non-chunked responses (e.g. page requests).
@@ -175,6 +168,11 @@ class HttpClientResponse
     public $combineChunks = true;
 
     /**
+     * re-use the HttpHeaders support shared with HttpClientRequest
+     */
+    use HttpHeaders;
+
+    /**
      * What type of HTTP response are we representing?
      * @param int $type
      */
@@ -236,6 +234,8 @@ class HttpClientResponse
     {
         if ($this->type == self::TYPE_IDENTITY)
         {
+            $this->statusCode    = null;
+            $this->statusMessage = null;
             $this->resetHeaders();
         }
 
@@ -245,16 +245,6 @@ class HttpClientResponse
         $this->errorMsgs = array();
         $this->body      = '';
         $this->bytesRead = 0;
-    }
-
-    /**
-     * forget any headers we saw previously
-     */
-    protected function resetHeaders()
-    {
-        $this->statusCode = null;
-        $this->statusMessage = null;
-        $this->headers = array();
     }
 
     /**
@@ -274,7 +264,7 @@ class HttpClientResponse
         }
 
         $value = substr($headerLine, strlen($heading) + 2);
-        $this->headers[$heading] = $value;
+        $this->setHeader($heading, $value);
     }
 
     /**

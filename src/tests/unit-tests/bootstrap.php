@@ -17,13 +17,13 @@ use Phix_Project\Autoloader4\PSR0_Autoloader;
 use Phix_Project\Autoloader4\Autoloader_Path;
 
 // step 1: create the APP_TOPDIR constant that all components require
-define('APP_TOPDIR', realpath(__DIR__ . '/../../php'));
-define('APP_LIBDIR', realpath(__DIR__ . '/../../../vendor/php'));
+define('APP_TOPDIR', realpath(__DIR__ . '/../../../src/php'));
+define('APP_LIBDIR', realpath(__DIR__ . '/../../../vendor'));
 define('APP_TESTDIR', realpath(__DIR__ . '/php'));
 
 // step 2: find the autoloader, and install it
-require_once(APP_LIBDIR . '/Phix_Project/Autoloader4/PSR0/Autoloader.php');
-require_once(APP_LIBDIR . '/Phix_Project/Autoloader4/Autoloader/Path.php');
+require_once(APP_LIBDIR . '/phix/autoloader/src/php/Phix_Project/Autoloader4/PSR0/Autoloader.php');
+require_once(APP_LIBDIR . '/phix/autoloader/src/php/Phix_Project/Autoloader4/Autoloader/Path.php');
 
 // step 3: add the additional paths to the include path
 Autoloader_Path::searchFirst(APP_LIBDIR);

@@ -45,7 +45,6 @@ namespace DataSift\Stone\HttpLib;
 
 use Exception;
 use DataSift\Stone\ExceptionsLib\LegacyErrorCatcher;
-use DataSift\Stone\StatsLib\StatsdClient;
 
 use DataSift\Stone\HttpLib\Transports\HttpChunkedTransport;
 use DataSift\Stone\HttpLib\Transports\HttpDefaultTransport;
@@ -77,13 +76,25 @@ class HttpClientConnection
     public $connectStart = null;
 
     /**
-     * how long to go before timing out operations, in seconds
+     * when did we succeed in connecting to the (possibly) remote server?
      *
-     * the default is 5 seconds
+     * Used to track our timings
+     * @var float
+     */
+    public $connectEnd = null;
+
+    /**
+     * how long to wait for reads to happen, in seconds
      *
      * @var float
      */
-    private $timeout = 5.0;
+    private $readTimeout = 5.0;
+
+    /**
+     * where are we connected to?
+     * @var HttpAddress
+     */
+    private $httpAddress;
 
     /**
      * Connect to the given URL
@@ -96,7 +107,6 @@ class HttpClientConnection
      */
     public function connect(HttpAddress $address, $timeout = 5.0)
     {
-        // timers!
         //var_dump('>> CONNECTING');
         $wrapper = new LegacyErrorCatcher();
         $errno  = 0;
@@ -127,18 +137,16 @@ class HttpClientConnection
             throw new E5xx_HttpConnectFailed($address, $errstr);
         }
 
-        // if we get here, we have a successful connection
-        // $context->stats->increment('connect.success');
-
         // set the stream to timeout aggressively
-        socket_set_timeout($this->socket, 0, 1000);
-
-        // set our own operations to timeout
-        $this->timeout = (float)$timeout;
+        socket_set_timeout($this->socket, 0, $this->readTimeout);
 
         // remember how long the connection took
         $this->connectStart = $microStart;
         $this->connectEnd   = $microEnd;
+
+        // remember where we are connected to, to help us reuse
+        // this connection
+        $this->httpAddress = $address;
 
         // all done
 		return true;
@@ -172,9 +180,6 @@ class HttpClientConnection
 
         fclose($this->socket);
         $this->socket = null;
-
-        //$context->stats->increment('connect.disconnect');
-        //$context->stats->timing('connect.close', microtime(true) - $this->connectStart);
     }
 
     /**
@@ -204,6 +209,36 @@ class HttpClientConnection
         // var_dump($start + $this->timeout);
         // var_dump($now);
         // var_dump($now < $start + $this->timeout);
+        return $line;
+    }
+
+    public function readLineWithTimeout($timeout = 1)
+    {
+        // make sure we have a valid timeout
+        if ($timeout == null) {
+            $timeout = 1;
+        }
+
+        // build the list of sockets to select() on
+        $read_list = [ $this->socket ];
+        $write_list = $except_list = [];
+
+        // we assume that simply waiting for a socket to have data is
+        // enough to satisfy the timeout condition
+        $noOfStreamsToRead = stream_select($read_list, $write_list, $except_list, $timeout);
+
+        // did we get anything?
+        if ($noOfStreamsToRead == 0 || count($read_list) == 0) {
+            throw new E5xx_HttpReadTimeout();
+        }
+
+        // because we cannot put a timeout on the fgets() operation,
+        // this does create a loophole where the timeout might not be
+        // strictly accurate :(
+        $line = fgets($this->socket);
+
+        // all done
+        var_dump($line);
         return $line;
     }
 
@@ -280,6 +315,59 @@ class HttpClientConnection
     public function isConnected()
     {
         return (is_resource($this->socket));
+    }
+
+    /**
+     * Are we connected to the same address?
+     *
+     * The HttpClient uses this to work out whether the connection can
+     * be reused or not
+     *
+     * @param  HttpAddress $address
+     *         the address to compare against
+     * @return boolean
+     *         TRUE if we are connected to $address,
+     *         FALSE otherwise
+     */
+    public function isConnectedTo(HttpAddress $address)
+    {
+        if (!$this->isConnected())
+        {
+            // we're currently disconnected
+            return false;
+        }
+
+        // are we connected via the same scheme?
+        if ($this->httpAddress->scheme != $address->scheme) {
+            return false;
+        }
+
+        // are we connected to the same host?
+        if ($this->httpAddress->hostname != $address->hostname) {
+            return false;
+        }
+
+        // same host ... but same port?
+        if ($this->httpAddress->port != $address->port) {
+            return false;
+        }
+
+        // what about auth credentials?
+        if (isset($this->httpAddress->user)) {
+            if ($this->httpAddress->user != $address->user) {
+                return false;
+            }
+
+            if ($this->httpAddress->password != $address->password) {
+                return false;
+            }
+        }
+
+        // if we get here, we're confident that we're connected to
+        // the same place
+        //
+        // this means that the connection can be reused by the HttpClient
+        return true;
     }
 
     /**
