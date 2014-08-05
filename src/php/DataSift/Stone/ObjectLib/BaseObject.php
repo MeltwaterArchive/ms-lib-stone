@@ -486,6 +486,29 @@ class BaseObject extends stdClass
     }
 
     /**
+     * do we have any properties defined?
+     *
+     * @return boolean
+     *         TRUE if there are any public properties
+     *         FALSE otherwise
+     */
+    public function hasProperties()
+    {
+        // get a list of our properties
+        $refObj   = new ReflectionObject($this);
+        $refProps = $refObj->getProperties(ReflectionProperty::IS_PUBLIC);
+
+        // do we have any?
+        if (count($refProps)) {
+            // yes we do
+            return true;
+        }
+
+        // if we get here, we do not
+        return false;
+    }
+
+    /**
      * magic method, called when there's an attempt to get a property
      * that doesn't actually exist
      *
