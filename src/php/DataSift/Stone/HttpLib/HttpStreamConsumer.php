@@ -115,7 +115,7 @@ class HttpStreamConsumer
             $bytesRead = 0;
 
             // we make the request
-            $response = $client->newGetRequest($request);
+            $response = $client->newRequest($request);
             if (!$response instanceof HttpClientResponse)
             {
                 // the connection failed
