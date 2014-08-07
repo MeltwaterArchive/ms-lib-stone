@@ -202,7 +202,7 @@ class HttpClientConnection
             // var_dump($line);
             $now = microtime(true);
         }
-        while(!$line && !$this->feof() && ($now < ($start + $this->timeout)));
+        while(!$line && !$this->feof() && ($now < ($start + $this->readTimeout)));
 
         // var_dump($line);
         // var_dump($this->feof());

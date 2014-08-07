@@ -121,7 +121,7 @@ abstract class HttpTransport
     {
         $encodedData = $request->getBody();
         if ($encodedData !== null) {
-            $connection->sendContent($encodedData);
+            $connection->send($encodedData);
         }
     }
 
