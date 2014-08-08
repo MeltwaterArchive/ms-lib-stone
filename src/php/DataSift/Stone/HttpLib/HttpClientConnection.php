@@ -262,7 +262,7 @@ class HttpClientConnection
             $block .= fread($this->socket, $blockSize - strlen($block));
             $now   = microtime(true);
         }
-        while (strlen($block) < $blockSize && !$this->feof() && ($start + $this->timeout) > $now);
+        while (strlen($block) < $blockSize && !$this->feof() && ($start + $this->readTimeout) > $now);
 
         // var_dump($block);
 
