@@ -129,8 +129,6 @@ class HttpClientRequest
      */
     public function __construct($address)
     {
-        $this->setAddress($address);
-
         // set our default headers
         $this->setHeaders([
             'Accept'        => 'text/html,application/xhtml,+xml,application/xml,application/json',
@@ -138,6 +136,11 @@ class HttpClientRequest
             'Connection'    => 'keep-alive',
             'UserAgent'     => 'Hornet/6.6.6 (DataSift Hive) PHP/CLI (Hornet, like wasps only with evil intent)',
         ]);
+
+        // parse the destination address
+        //
+        // this sets the 'Host' header roo
+        $this->setAddress($address);
     }
 
     // ==================================================================
