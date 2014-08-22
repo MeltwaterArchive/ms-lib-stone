@@ -140,7 +140,7 @@ class HttpChunkedTransport extends HttpTransport
      * @param HttpClientResponse $response where we put the results
      * @return mixed null on error, otherwise the size of the content read
      */
-    public function readContent(HttpClientConnection $connection, HttpClientResponse $response)
+    public function readContent(HttpClientConnection $connection, HttpClientResponse $response, $isStream = false)
     {
         // cannot read if we do not have an open socket
         if (!$connection->isConnected())
@@ -161,7 +161,7 @@ class HttpChunkedTransport extends HttpTransport
         $chunkCount = 0;
 
         // do we need to read all of the chunks in one go?
-        if ($response->connectionMustClose())
+        if ($response->connectionMustClose() || !$isStream)
         {
             $chunkSize = 1;
             do

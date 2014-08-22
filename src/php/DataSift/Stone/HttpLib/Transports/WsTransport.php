@@ -333,7 +333,7 @@ class WsTransport extends HttpTransport
      * @param HttpClientResponse $response where we put the results
      * @return mixed null on error, otherwise the size of the content read
      */
-    public function readContent(HttpClientConnection $connection, HttpClientResponse $response)
+    public function readContent(HttpClientConnection $connection, HttpClientResponse $response, $isStream = false)
     {
         // var_dump('>> READING FRAME');
 
