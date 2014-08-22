@@ -293,7 +293,7 @@ abstract class HttpTransport
      * @param HttpClientResponse $response where we put the results
      * @return mixed null on error, otherwise the size of the content read
      */
-    abstract public function readContent(HttpClientConnection $connection, HttpClientResponse $response);
+    abstract public function readContent(HttpClientConnection $connection, HttpClientResponse $response, $isStream = false);
 
     /**
      * Work out whether we like the response or not

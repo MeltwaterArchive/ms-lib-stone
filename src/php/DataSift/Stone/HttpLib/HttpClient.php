@@ -222,7 +222,7 @@ class HttpClient
      * @return boolean false if there was no more data, true otherwise
      */
 
-    public function readContent(HttpClientResponse $response)
+    public function readContent(HttpClientResponse $response, $isStream = false)
     {
         // do we have an open connection?
         if (!isset($this->connection))
@@ -237,7 +237,7 @@ class HttpClient
 
         // if we get here, we are connected
         $response->resetForNextResponse();
-        return $this->transport->readContent($this->connection, $response);
+        return $this->transport->readContent($this->connection, $response, $isStream);
     }
 
     /**
