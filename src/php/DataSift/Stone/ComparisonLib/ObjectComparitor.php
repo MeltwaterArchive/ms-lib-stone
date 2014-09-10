@@ -224,6 +224,34 @@ class ObjectComparitor extends ComparitorBase
 	}
 
 	/**
+	 * is the value under test 'empty', according to PHP?
+	 *
+	 * @return ComparisonResult
+	 */
+	public function isEmpty()
+	{
+		// do we have valid data to test against?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is our data 'empty'?
+		//
+		// we have to turn it into an array for PHP's empty() to work
+		// on it :(
+		$tmpValue = (array)$this->value;
+		if (!empty($tmpValue)) {
+			// no, it is not
+			$result->setHasFailed("empty value", "value is not empty");
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
 	 * does the object under test have a given method name?
 	 *
 	 * @param  string  $methodName the method to test for
