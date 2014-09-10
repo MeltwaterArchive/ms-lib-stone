@@ -195,21 +195,25 @@ class HttpClientConnection
 
         // var_dump('>> readLine() ' . __LINE__);
         $line = false;
+        $returnLine = '';
         do
         {
             // var_dump($this->feof());
             $line = fgets($this->socket);
+            if ($line) {
+                $returnLine = $returnLine . $line;
+            }
             // var_dump($line);
             $now = microtime(true);
         }
-        while(!$line && !$this->feof() && ($now < ($start + $this->readTimeout)));
+        while((!$line || substr($returnLine, -2, 2) != "\r\n") && !$this->feof() && ($now < ($start + $this->readTimeout)));
 
         // var_dump($line);
         // var_dump($this->feof());
         // var_dump($start + $this->timeout);
         // var_dump($now);
         // var_dump($now < $start + $this->timeout);
-        return $line;
+        return $returnLine;
     }
 
     public function readLineWithTimeout($timeout = 1)
