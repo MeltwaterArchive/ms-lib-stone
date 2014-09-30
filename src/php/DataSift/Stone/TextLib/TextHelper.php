@@ -56,6 +56,31 @@ namespace DataSift\Stone\TextLib;
 class TextHelper
 {
     /**
+     * convert a camelCasedCase word into an array of words. Mostly used
+     * to expand method names when dealing with fake methods.
+     *
+     * @param  string $text
+     *         the string to convert into words
+     * @return array<string>
+     */
+    static public function convertCamelCaseToWords($text, $forceLowerCase = false)
+    {
+        // insert spaces into the text
+        $text = preg_replace('/([A-Z])/', " $1", $text);
+
+        // do we need to make every word lower-case?
+        if ($forceLowerCase) {
+            $text = strtolower($text);
+        }
+
+        // turn the string into an array of words
+        $words = explode(' ', trim($text));
+
+        // all done
+        return $words;
+    }
+
+    /**
      * work out the right descriptive word to use based on the number of
      * items in the list
      *
