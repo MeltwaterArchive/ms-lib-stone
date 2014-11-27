@@ -77,6 +77,11 @@ abstract class ConfigFile
         	throw new E4xx_ConfigFileNotFound($filename);
         }
 
+        // make sure the file is not a folder
+        if (is_dir($filename)) {
+            throw new E4xx_ConfigFileIsAFolder($filename);
+        }
+
         // if we get here, we have a file that we can read
 
         // we could potentially get legacy errors here, so best to wrap
@@ -113,11 +118,11 @@ abstract class ConfigFile
 		$configFolder = dirname($filename);
 		if (!is_dir($configFolder)) {
 			// hrm ... can we make it?
-            $success = mkdir($filename, 0700, true);
+            $success = mkdir($configFolder, 0700, true);
 
             // did it work?
             if (!$success) {
-                throw new E4xx_CannotCreateConfigFolder($filename);
+                throw new E4xx_CannotCreateConfigFolder($configFolder);
             }
    		}
 
