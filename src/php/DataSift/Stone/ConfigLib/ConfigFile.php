@@ -118,11 +118,11 @@ abstract class ConfigFile
 		$configFolder = dirname($filename);
 		if (!is_dir($configFolder)) {
 			// hrm ... can we make it?
-            $success = mkdir($filename, 0700, true);
+            $success = mkdir($configFolder, 0700, true);
 
             // did it work?
             if (!$success) {
-                throw new E4xx_CannotCreateConfigFolder($filename);
+                throw new E4xx_CannotCreateConfigFolder($configFolder);
             }
    		}
 
