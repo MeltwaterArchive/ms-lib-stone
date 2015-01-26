@@ -165,7 +165,7 @@ class HttpClient
         }
 
         // now, do we have any valid content to read?
-        if ($response->type && !$response->hasErrors())
+        if ($response->type && !$response->hasErrors() && $response->statusCode !== 204)
         {
             $this->transport->readContent($this->connection, $response);
         }
