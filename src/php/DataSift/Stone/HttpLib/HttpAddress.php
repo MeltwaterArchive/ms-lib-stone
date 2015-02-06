@@ -193,7 +193,22 @@ class HttpAddress
     public function getPhpSocketHostname()
     {
         if ($this->scheme == "https") {
-            return "tls://" . $this->hostname;
+            // use our preferred transports if available
+            $desiredSchemes = array(
+                "tlsv1.2",
+                "sslv3",
+                "tls",
+                "ssl"
+            );
+            $supportedSchemes = stream_get_transports();
+            foreach ($desiredSchemes as $desiredScheme) {
+                if (in_array($desiredScheme, $supportedSchemes)) {
+                    return "{$desiredScheme}://" . $this->hostname;
+                }
+            }
+
+            // if we get here, then there's no support available :(
+            throw new E4xx_NoHttpsSupport();
         }
         else {
             return $this->hostname;
