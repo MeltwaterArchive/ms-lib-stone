@@ -96,7 +96,7 @@ class HttpClient
     {
         // before anything else, we need to connect to the (possibly)
         // remote server
-        $this->connection = $this->getConnectionTo($request->getAddress());
+        $this->connection = $this->getConnectionTo($request->getAddress(), $request);
 
         // pick our transport
         $this->transport = $this->getInitialTransport($request);
@@ -314,7 +314,7 @@ class HttpClient
      * @param  HttpAddress $address
      * @return HttpClientConnection
      */
-    protected function getConnectionTo(HttpAddress $address)
+    protected function getConnectionTo(HttpAddress $address, HttpClientRequest $request)
     {
         // are we already connected?
         if ($this->connection instanceof HttpClientConnection) {
@@ -331,7 +331,7 @@ class HttpClient
 
         // if we get here, we need to make a new connection
         $connection = new HttpClientConnection();
-        if (!$connection->connect($address, 5))
+        if (!$connection->connect($address, 5, $request->getShouldValidateSslCertificate()))
         {
             throw new E5xx_HttpConnectFailed((string)$address, "error information not available");
         }

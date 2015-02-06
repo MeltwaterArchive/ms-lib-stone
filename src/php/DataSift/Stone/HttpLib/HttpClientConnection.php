@@ -105,28 +105,54 @@ class HttpClientConnection
      *        how long to wait before timing out the connection attempt
      * @return void
      */
-    public function connect(HttpAddress $address, $timeout = 5.0)
+    public function connect(HttpAddress $address, $timeout = 5.0, $sslVerify = true)
     {
         //var_dump('>> CONNECTING');
-        $wrapper = new LegacyErrorCatcher();
-        $errno  = 0;
-        $errstr = '';
-        $callback = function($hostname, $port) use($errno, $errstr, $timeout)
-        {
-            return fsockopen($hostname, $port, $errno, $errstr, $timeout);
-        };
 
+        // what are we doing about SSL?
+        if ($sslVerify) {
+            $sslOptions = array(
+                "verify_peer" => true,
+                "verify_peer_name" => true,
+            );
+        }
+        else {
+            $sslOptions = array(
+                "verify_peer" => false,
+                "verify_peer_name" => false,
+            );
+        }
+
+        // we need a stream context to be able to use the SSL options
+        $streamContext = stream_context_create(array('ssl' => $sslOptions));
+
+        // which socket transport(s) are we attempting?
+        //
+        // for HTTPS, we may need to attempt several (starting with the
+        // most secure) because the remote server may only support older,
+        // insecure transports
+        $transports = $this->getSocketTransports($address->scheme);
+
+        // let's try and connect
+        $errno = 0;
+        $errstr = "";
         $microStart = microtime(true);
-        try
-        {
-            $this->socket = $wrapper->callUserFuncArray($callback, array($address->hostname, $address->port));
+        foreach ($transports as $transport) {
+            // open our socket, and return to caller
+            $this->socket = @stream_socket_client(
+                $transport . "://" . $address->hostname . ':' . $address->port,
+                $errno,
+                $errstr,
+                $timeout,
+                STREAM_CLIENT_CONNECT,
+                $streamContext
+            );
+
+            if (is_resource($this->socket)) {
+                break;
+            }
         }
-        catch (Exception $e)
-        {
-            // well, that did not go well
-            // var_dump($e->getMessage());
-            throw new E5xx_HttpConnectFailed($address, $e->getMessage());
-        }
+
         $microEnd = microtime(true);
         //var_dump('>> CONNECTED');
 
@@ -134,6 +160,19 @@ class HttpClientConnection
         if (!is_resource($this->socket))
         {
             // connection failed
+            //
+            // did we get a usable error message?
+            if ($errno == 0) {
+                // no, we did not
+                if ($address->scheme == 'https') {
+                    throw new E5xx_HttpConnectFailed($address, "site down or SSL certificate error?");
+                }
+                else {
+                    throw new E5xx_HttpConnectFailed($address, "site down?");
+                }
+            }
+
+            // if we get here, then we have a usable error message
             throw new E5xx_HttpConnectFailed($address, $errstr);
         }
 
@@ -150,6 +189,40 @@ class HttpClientConnection
 
         // all done
 		return true;
+    }
+
+    private function getSocketTransports($scheme)
+    {
+        // special case
+        if ($scheme == "http") {
+            return array ("tcp");
+        }
+
+        // if we get here, we are looking for HTTPS transports
+        $transports = array();
+
+        // use our preferred transports if available
+        $desiredSchemes = array(
+            "tlsv1.2",
+            "sslv3",
+            "tls",
+            "ssl"
+        );
+        $supportedSchemes = stream_get_transports();
+        foreach ($desiredSchemes as $desiredScheme) {
+            if (in_array($desiredScheme, $supportedSchemes)) {
+                $transports[] = $desiredScheme;
+            }
+        }
+
+        // did we find any?
+        if (count($transports) == 0) {
+            // if we get here, then there's no support available :(
+            throw new E4xx_NoHttpsSupport();
+        }
+
+        // all done
+        return $transports;
     }
 
     /**

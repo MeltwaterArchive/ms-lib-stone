@@ -77,7 +77,6 @@ class HttpAddress
      * The host we are connecting to
      * @var string
      */
-
     public $hostname = null;
 
     /**
