@@ -77,7 +77,6 @@ class HttpAddress
      * The host we are connecting to
      * @var string
      */
-
     public $hostname = null;
 
     /**
@@ -188,31 +187,6 @@ class HttpAddress
         $this->rawAddress = $addressString;
 
         // at this point, we're all set to go :)
-    }
-
-    public function getPhpSocketHostname()
-    {
-        if ($this->scheme == "https") {
-            // use our preferred transports if available
-            $desiredSchemes = array(
-                "tlsv1.2",
-                "sslv3",
-                "tls",
-                "ssl"
-            );
-            $supportedSchemes = stream_get_transports();
-            foreach ($desiredSchemes as $desiredScheme) {
-                if (in_array($desiredScheme, $supportedSchemes)) {
-                    return "{$desiredScheme}://" . $this->hostname;
-                }
-            }
-
-            // if we get here, then there's no support available :(
-            throw new E4xx_NoHttpsSupport();
-        }
-        else {
-            return $this->hostname;
-        }
     }
 
     /**
