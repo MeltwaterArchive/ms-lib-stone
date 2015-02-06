@@ -115,6 +115,17 @@ class HttpClientRequest
     private $strictExpectsHandling = true;
 
     /**
+     * for https: connections, do we want to validate the SSL / TLS
+     * certificate?
+     *
+     * you have to turn this off for connecting to servers that are using
+     * self-signed certificates
+     *
+     * @var boolean
+     */
+    private $validateSslCertificate = true;
+
+    /**
      * import our standard HttpHeaders support, which is also used
      * in the HttpClientResponse
      */
@@ -262,6 +273,46 @@ class HttpClientRequest
     {
         return $this->setHeader('UserAgent', $userAgent);
     }
+
+    // ==================================================================
+    //
+    // SSL support
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * Switch off SSL cert verification
+     *
+     * very handy if you are using self-signed certificates
+     *
+     * @return void
+     */
+    public function disableSslCertificateValidation()
+    {
+        $this->validateSslCertificate = false;
+    }
+
+    /**
+     * Switch on SSL cert verification
+     *
+     * @return void
+     */
+    public function enableSslCertificateValidation()
+    {
+        $this->enableSslCertificate = false;
+    }
+
+    /**
+     * should we validate the SSL certificate in this request?
+     *
+     * @return bool
+     */
+    public function getShouldValidateSslCertificate()
+    {
+        return $this->validateSslCertificate;
+    }
+
+
 
     // ==================================================================
     //
