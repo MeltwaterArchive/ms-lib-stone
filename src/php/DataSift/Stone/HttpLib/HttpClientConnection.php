@@ -119,7 +119,7 @@ class HttpClientConnection
         $microStart = microtime(true);
         try
         {
-            $this->socket = $wrapper->callUserFuncArray($callback, array($address->hostname, $address->port));
+            $this->socket = $wrapper->callUserFuncArray($callback, array($address->getPhpSocketHostname(), $address->port));
         }
         catch (Exception $e)
         {

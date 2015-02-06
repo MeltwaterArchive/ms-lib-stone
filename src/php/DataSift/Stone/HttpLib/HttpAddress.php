@@ -190,6 +190,16 @@ class HttpAddress
         // at this point, we're all set to go :)
     }
 
+    public function getPhpSocketHostname()
+    {
+        if ($this->scheme == "https") {
+            return "tls://" . $this->hostname;
+        }
+        else {
+            return $this->hostname;
+        }
+    }
+
     /**
      * fill in the blanks when we have a HTTP address
      */
