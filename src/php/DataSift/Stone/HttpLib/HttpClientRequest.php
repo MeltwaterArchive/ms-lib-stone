@@ -299,7 +299,7 @@ class HttpClientRequest
      */
     public function enableSslCertificateValidation()
     {
-        $this->enableSslCertificate = false;
+        $this->validateSslCertificate = false;
     }
 
     /**
