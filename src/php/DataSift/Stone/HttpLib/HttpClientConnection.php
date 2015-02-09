@@ -204,7 +204,6 @@ class HttpClientConnection
         // use our preferred transports if available
         $desiredSchemes = array(
             "tlsv1.2",
-            "sslv3",
             "tls",
             "ssl"
         );
@@ -262,7 +261,7 @@ class HttpClientConnection
      *
      * @return string
      */
-    public function readLine()
+    public function readLine($remainingLen = null)
     {
         $start = microtime(true);
 
@@ -271,21 +270,23 @@ class HttpClientConnection
         $returnLine = '';
         do
         {
-            // var_dump($this->feof());
+            //var_dump($this->feof());
             $line = fgets($this->socket);
             if ($line) {
                 $returnLine = $returnLine . $line;
             }
-            // var_dump($line);
+            // var_dump($returnLine);
             $now = microtime(true);
+            // var_dump(strlen($returnLine));
+            // var_dump($remainingLen);
         }
-        while((!$line || substr($returnLine, -2, 2) != "\r\n") && !$this->feof() && ($now < ($start + $this->readTimeout)));
+        while((!$line || substr($returnLine, -2, 2) != "\r\n") && strlen($returnLine) < $remainingLen && !$this->feof() && ($now < ($start + $this->readTimeout)));
 
-        // var_dump($line);
+        //var_dump($line);
         // var_dump($this->feof());
         // var_dump($start + $this->timeout);
         // var_dump($now);
-        // var_dump($now < $start + $this->timeout);
+        //var_dump($now < $start + $this->timeout);
         return $returnLine;
     }
 

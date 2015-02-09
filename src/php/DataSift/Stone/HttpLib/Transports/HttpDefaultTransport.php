@@ -126,13 +126,19 @@ class HttpDefaultTransport extends HttpTransport
         $body = '';
         do
         {
-            $body .= $connection->readLine();
+            if ($expectedLen !== null) {
+                $remainingLen = $expectedLen - strlen($body);
+            }
+            else {
+                $remainingLen = null;
+            }
+            $body .= $connection->readLine($remainingLen);
             // var_dump($body);
 
             // keep count of how much data we've read
             $response->bytesRead += strlen($body);
         }
-        while (!$connection->feof() && ($expectedLen && $response->bytesRead < $expectedLen));
+        while (!$connection->feof() && ($expectedLen && (strlen($body) < $expectedLen)));
 
         // stash the retrieved body in the response
         $response->decodeBody($body);
