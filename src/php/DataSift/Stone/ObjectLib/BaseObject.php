@@ -47,6 +47,9 @@ use ReflectionObject;
 use ReflectionProperty;
 use stdClass;
 
+use Twig_Environment;
+use Twig_Loader_String;
+
 /**
  * A base class to be a home for generic helper methods, at least until
  * we move to PHP 5.5 and traits
@@ -536,4 +539,386 @@ class BaseObject extends stdClass
             }
         }
     }
+
+    // ==================================================================
+    //
+    // Twig variable support
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * expand any variables in $this
+     *
+     * @param  array|object $baseData
+     *         the config to use for expanding variables (optional)
+     * @return array|object
+     *         a copy of the config stored in $this, with any Twig
+     *         variables expanded
+     */
+    public function getExpandedData($baseData = null)
+    {
+        return $this->expandData($this, $baseData);
+    }
+
+    /**
+     * expand any piece of data
+     *
+     * @param  mixed $dataToExpand
+     *         the data to run through Twig
+     * @param  array|object $baseData
+     *         the config to use for expanding variables (optional)
+     * @return array|object
+     *         a copy of the config stored in $this, with any Twig
+     *         variables expanded
+     */
+    protected function expandData($dataToExpand, $baseData = null)
+    {
+        // special case - is the data expandable in the first place?
+        if (!is_object($dataToExpand) && !is_array($dataToExpand) && !is_string($dataToExpand)) {
+            return $dataToExpand;
+        }
+
+        // we're going to use Twig to expand any parameters in our
+        // config
+        //
+        // this seems horribly inefficient, but it does work reliably
+        $loader = new Twig_Loader_String();
+        $templateEngine   = new Twig_Environment($loader);
+
+        // Twig is a template engine. it needs a text string to operate on
+        $configString = json_encode($dataToExpand);
+
+        // Twig needs an array of data to expand variables from
+        if ($baseData === null) {
+            $baseData = $this;
+        }
+        $varData = json_decode(json_encode($baseData), true);
+
+        // use Twig to expand any config variables
+        $raw = $templateEngine->render($configString, $varData);
+        $expandedData = json_decode($raw);
+
+        // make sure we have our handy BaseObject, because it does nice
+        // things like throw exceptions when someone tries to access an
+        // attribute that does not exist
+        if (is_object($expandedData)) {
+            $tmp = new BaseObject();
+            $tmp->mergeFrom($expandedData);
+            $expandedData = $tmp;
+        }
+        else if (is_array($expandedData)) {
+            foreach (array_keys($expandedData) as $key) {
+                if (is_object($expandedData[$key])) {
+                    $tmp = new BaseObject();
+                    $tmp->mergeFrom($expandedData[$key]);
+                    $expandedData[$key] = $tmp;
+                }
+            }
+        }
+
+        // all done
+        return $expandedData;
+    }
+
+    // ==================================================================
+    //
+    // dot.notation.support
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * retrieve data using a dot.notation.path
+     *
+     * NOTE that you should treat any data returned from here as READ-ONLY
+     *
+     * @param  string $path
+     *         the dot.notation.path to use to navigate
+     *
+     * @return mixed
+     */
+    public function getData($path)
+    {
+        // special case
+        if (empty($path)) {
+            return $this;
+        }
+
+        $retval = $this->getPath($path);
+        $retval = $this->expandData($retval);
+
+        return $retval;
+    }
+
+    protected function &getPath($path, $expandPath = false)
+    {
+        // special case
+        if (empty($path)) {
+            return $this;
+        }
+
+        // this is where we start from
+        $retval = $this;
+
+        // this is where we have been so far, for error-reporting
+        // purposes
+        $pathSoFar = [];
+
+        // walk down the path
+        $parts = explode(".", $path);
+        foreach ($parts as $part)
+        {
+            if (is_object($retval)) {
+                if (isset($retval->$part)) {
+                    $retval = &$retval->$part;
+                }
+                else if ($expandPath) {
+                    $retval->$part = new BaseObject;
+                    $retval = &$retval->$part;
+                }
+                else {
+                    throw new E4xx_PathNotFound($path);
+                }
+            }
+            else if (is_array($retval)) {
+                if (isset($retval[$part])) {
+                    $retval = &$retval[$part];
+                }
+                else if ($expandPath) {
+                    $retval[$part] = new BaseObject;
+                    $retval = &$retval[$part];
+                }
+                else {
+                    throw new E4xx_PathNotFound($path);
+                }
+            }
+            else {
+                // we can go no further
+                if ($expandPath) {
+                    throw new E4xx_PathCannotBeExtended($path, implode('.', $pathSoFar), gettype($retval));
+                }
+                else {
+                    throw new E4xx_PathNotFound($path);
+                }
+            }
+
+            // remember where we have been, in case we need to report
+            // and error soon
+            $pathSoFar[] = $part;
+        }
+
+        // if we get here, we have walked the whole path
+        return $retval;
+    }
+
+    /**
+     * retrieve data from a dot.notation.path
+     *
+     * throws an exception if the path does not point to an array
+     *
+     * @param string $path
+     *        the dot.notation.path to the data to return
+     * @return array
+     */
+    public function getArray($path)
+    {
+        $retval = $this->getPath($path);
+
+        if (!is_array($retval)) {
+            throw new E4xx_PropertyNotAnArray($path);
+        }
+
+        $retval = (array)$this->expandData($retval);
+
+        return $retval;
+    }
+
+    /**
+     * retrieve data from a dot.notation.path
+     *
+     * throws an exception if the path does not point to an object
+     *
+     * @param string $path
+     *        the dot.notation.path to the data to return
+     * @return object
+     */
+    public function getObject($path)
+    {
+        $retval = $this->getPath($path);
+
+        if (!is_object($retval)) {
+            throw new E4xx_PropertyNotAnObject($path);
+        }
+
+        $retval = $this->expandData($retval);
+
+        return $retval;
+    }
+
+    /**
+     * check for existence of data using a dot.notation.path
+     *
+     * @param  string $path
+     *         the dot.notation.path to use to navigate
+     *
+     * @return boolean
+     */
+    public function hasData($path)
+    {
+        // special case
+        if (empty($path)) {
+            return true;
+        }
+
+        // walk down the path
+        $parts = explode(".", $path);
+
+        // this is where we start from
+        $retval = $this;
+
+        foreach ($parts as $part)
+        {
+            if (is_object($retval)) {
+                if (isset($retval->$part)) {
+                    $retval = $retval->$part;
+                }
+                else {
+                    return false;
+                }
+            }
+            else if (is_array($retval)) {
+                if (isset($retval[$part])) {
+                    $retval = $retval[$part];
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                // we can go no further
+                return false;
+            }
+        }
+
+        // if we get here, we have walked the whole path
+        return true;
+    }
+
+    /**
+     * merge data into this config
+     *
+     * @param  string $path
+     *         path.to.merge.to
+     * @param  mixed $dataToMerge
+     *         the data to merge at $path
+     * @return void
+     */
+    public function mergeData($path, $dataToMerge)
+    {
+        // special case - we treat objects and arrays differently to other
+        // data types
+        if (!is_object($dataToMerge) && !is_array($dataToMerge)) {
+            // we just need to set the data instead
+            $this->setData($path, $dataToMerge);
+            return;
+        }
+
+        // get to where we need to be
+        $leaf =& $this->getPath($path, true);
+
+        // if we get here, then we know where we are adding the new
+        // data
+        if (is_object($leaf)) {
+            $leaf->mergeFrom($dataToMerge);
+        }
+        else if (is_array($leaf)) {
+            $leaf = array_merge($leaf, $dataToMerge);
+        }
+        else {
+            throw new E4xx_PathCannotBeExtended($path, $path, gettype($leaf));
+        }
+
+        // all done
+    }
+
+    /**
+     * assigns data to a specific path
+     *
+     * @param string $path
+     *        the path to assign to
+     * @param mixed $data
+     *        the data to assign
+     */
+    public function setData($path, $data)
+    {
+        // special case - empty path
+        if (empty($path)) {
+            $this->mergeFrom($data);
+            return;
+        }
+
+        // walk down the path
+        $parts = explode(".", $path);
+        $lastPart = end($parts);
+        $parts = array_slice($parts, 0, count($parts) - 1);
+
+        // create the path
+        $leaf =& $this->getPath(implode(".", $parts), true);
+
+        // if we get here, then we know where we are adding the new
+        // data
+        if (is_array($leaf)) {
+            $leaf[$lastPart] = $data;
+        }
+        else if (is_object($leaf)) {
+            $leaf->$lastPart = $data;
+        }
+        else {
+            // we cannot add to this
+            throw new E4xx_PathCannotBeExtended($path, implode(".", $parts), gettype($leaf));
+        }
+
+        // all done
+    }
+
+    /**
+     * remove data using a dot.notation.path
+     *
+     * @param  string $path
+     *         the dot.notation.path to use to navigate
+     *
+     * @return void
+     */
+    public function unsetData($path)
+    {
+        // walk down the path
+        $parts = explode(".", $path);
+        $lastPart = end($parts);
+        $parts = array_slice($parts, 0, count($parts) - 1);
+
+        // this is where we start from
+        $retval =& $this->getPath(implode(".", $parts));
+
+        // if we get here, we have walked the whole path, and are ready
+        // to unset the value
+        if (is_object($retval)) {
+            if (isset($retval->$lastPart)) {
+                unset($retval->$lastPart);
+            }
+            else {
+                throw new E4xx_PathNotFound($path);
+            }
+        }
+        else if (is_array($retval)) {
+            if (isset($retval[$lastPart])) {
+                unset($retval[$lastPart]);
+            }
+            else {
+                throw new E4xx_PathNotFound($path);
+            }
+        }
+        else {
+            throw new E4xx_PathNotFound($path);
+        }
+    }
+
 }
