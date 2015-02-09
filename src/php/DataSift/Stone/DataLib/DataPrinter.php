@@ -117,6 +117,12 @@ class DataPrinter
         if (is_resource($mixed)) {
             return $this->resourceToString($mixed);
         }
+        if (is_bool($mixed)) {
+            if ($mixed) {
+                return 'true';
+            }
+            return 'false';
+        }
 
         // if we get here, then no complicated conversion required
         return (string)$mixed;
