@@ -204,7 +204,6 @@ class HttpClientConnection
         // use our preferred transports if available
         $desiredSchemes = array(
             "tlsv1.2",
-            "sslv3",
             "tls",
             "ssl"
         );
