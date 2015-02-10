@@ -263,6 +263,11 @@ class HttpClientConnection
      */
     public function readLine($remainingLen = null)
     {
+        // special case - we do not know what the Content-Length: was
+        if ($remainingLen === null) {
+            $remainingLen = PHP_INT_MAX;
+        }
+
         $start = microtime(true);
 
         // var_dump('>> readLine() ' . __LINE__);
