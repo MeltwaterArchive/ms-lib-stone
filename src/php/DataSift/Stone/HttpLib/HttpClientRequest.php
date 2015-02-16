@@ -57,6 +57,12 @@ namespace DataSift\Stone\HttpLib;
 class HttpClientRequest
 {
     /**
+     * How long before we timeout?
+     * @var int
+     */
+    private $timeout = 5;
+
+    /**
      * The URL we are connecting to
      * @var HttpAddress
      */
@@ -595,5 +601,34 @@ class HttpClientRequest
     public function asDeleteRequest()
     {
         return $this->withHttpVerb("DELETE");
+    }
+
+    /**
+     * Some requests are expected to take more than our default
+     * timeout of 5 seconds. Use setTimeout to change the amount
+     * of time before we time out
+     *
+     * @param int $timeout Time in seconds before the request fails
+     *
+     * @return void
+     */
+    public function setTimeout($timeout)
+    {
+        if (!is_int($timeout)) {
+            throw new \Exception("HttpClientRequest::setTimeout() expects an integer");
+        }
+
+        $this->timeout = $timeout;
+    }
+
+    /**
+     * Get the timeout in seconds for this request. Defaults to
+     * 5 seconds
+     *
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
     }
 }
