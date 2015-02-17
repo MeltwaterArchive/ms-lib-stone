@@ -105,7 +105,7 @@ class HttpClientConnection
      *        how long to wait before timing out the connection attempt
      * @return void
      */
-    public function connect(HttpAddress $address, $timeout = 5.0, $sslVerify = true)
+    public function connect(HttpAddress $address, $connectTimeout = 5.0, $sslVerify = true)
     {
         //var_dump('>> CONNECTING');
 
@@ -177,7 +177,7 @@ class HttpClientConnection
         }
 
         // set the stream to timeout aggressively
-        socket_set_timeout($this->socket, 0, $this->readTimeout);
+        socket_set_timeout($this->socket, 0, $this->getReadTimeout());
 
         // remember how long the connection took
         $this->connectStart = $microStart;
@@ -285,7 +285,7 @@ class HttpClientConnection
             // var_dump(strlen($returnLine));
             // var_dump($remainingLen);
         }
-        while((!$line || substr($returnLine, -2, 2) != "\r\n") && strlen($returnLine) < $remainingLen && !$this->feof() && ($now < ($start + $this->readTimeout)));
+        while((!$line || substr($returnLine, -2, 2) != "\r\n") && strlen($returnLine) < $remainingLen && !$this->feof() && ($now < ($start + $this->getReadTimeout())));
 
         //var_dump($line);
         // var_dump($this->feof());
@@ -345,7 +345,7 @@ class HttpClientConnection
             $block .= fread($this->socket, $blockSize - strlen($block));
             $now   = microtime(true);
         }
-        while (strlen($block) < $blockSize && !$this->feof() && ($start + $this->readTimeout) > $now);
+        while (strlen($block) < $blockSize && !$this->feof() && ($start + $this->getReadTimeout()) > $now);
 
         // var_dump($block);
 
@@ -464,5 +464,34 @@ class HttpClientConnection
     public function getSocket()
     {
         return $this->socket;
+    }
+
+    /**
+     * Some requests might take more than our default
+     * timeout of 5 seconds. Use setReadTimeout
+     * to change the amount of time before we time out
+     *
+     * @param float $timeout Time in seconds before the request fails
+     *
+     * @return void
+     */
+    public function setReadTimeout($timeout)
+    {
+        if (!is_float($timeout)) {
+            throw new \Exception("HttpClientConnection::setReadTimeout() expects a float");
+        }
+
+        $this->readTimeout = $timeout;
+    }
+
+    /**
+     * Get the read timeout in seconds for this request.
+     * Defaults to 5 seconds
+     *
+     * @return int
+     */
+    public function getReadTimeout()
+    {
+        return $this->readTimeout;
     }
 }
