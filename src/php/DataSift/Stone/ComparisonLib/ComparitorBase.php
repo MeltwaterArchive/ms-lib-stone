@@ -66,7 +66,7 @@ abstract class ComparitorBase
 	 *
 	 * @param mixed $value the value that we will run comparisons against
 	 */
-	public function __construct($value)
+	public function __construct(&$value)
 	{
 		$this->value = $value;
 	}

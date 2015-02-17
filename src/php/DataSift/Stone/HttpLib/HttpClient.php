@@ -331,7 +331,7 @@ class HttpClient
 
         // if we get here, we need to make a new connection
         $connection = new HttpClientConnection();
-        if (!$connection->connect($address, 5, $request->getShouldValidateSslCertificate()))
+        if (!$connection->connect($address, $request->getTimeout(), $request->getShouldValidateSslCertificate()))
         {
             throw new E5xx_HttpConnectFailed((string)$address, "error information not available");
         }

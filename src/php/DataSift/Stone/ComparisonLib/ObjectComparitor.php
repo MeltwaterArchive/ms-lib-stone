@@ -238,9 +238,8 @@ class ObjectComparitor extends ComparitorBase
 
 		// is our data 'empty'?
 		//
-		// we have to turn it into an array for PHP's empty() to work
-		// on it :(
-		$tmpValue = (array)$this->value;
+		// this is a very reliable way - it only considers public properties
+		$tmpValue = get_object_vars($this->value);
 		if (!empty($tmpValue)) {
 			// no, it is not
 			$result->setHasFailed("empty value", "value is not empty");
