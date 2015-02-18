@@ -53,7 +53,7 @@ namespace DataSift\Stone\ComparisonLib;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class DoubleComparitor extends IntegerComparitor
+class DoubleComparitor extends ComparitorBase
 {
 	// ==================================================================
 	//
@@ -83,4 +83,142 @@ class DoubleComparitor extends IntegerComparitor
 		// all done
 		return $result;
 	}
-}
+
+	// ==================================================================
+	//
+	// The comparisons that this data type supports
+	//
+	// ------------------------------------------------------------------
+
+	/**
+	 * test our data to see if it has the same value as another double
+	 *
+	 * @param  double $expected
+	 *         the value to compare against
+	 * @return ComparisonResult
+	 */
+	public function equals($expected)
+	{
+		// do we really have a double to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is our value the expected value?
+		if ($this->value != $expected) {
+			$result->setHasFailed($expected, $this->value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
+	 * is the value under test greater than what we expect?
+	 *
+	 * @param  double $expected
+	 *         the value we expect to be greater than
+	 * @return ComparisonResult
+	 */
+	public function isGreaterThan($expected)
+	{
+		// do we really have a double to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is our value greater than the expected value?
+		if ($this->value <= $expected) {
+			$result->setHasFailed("> {$expected}", $this->value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
+	 * is the value under test greater than or equal to what we expect?
+	 *
+	 * @param  double $expected
+	 *         the value we expect to be greater than or equal to
+	 * @return ComparisonResult
+	 */
+	public function isGreaterThanOrEqualTo($expected)
+	{
+		// do we really have a double to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is our value greater than the expected value?
+		if ($this->value < $expected) {
+			$result->setHasFailed(">= {$expected}", $this->value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
+	 * is the value under test really a double?
+	 * @return ComparisonResult
+	 */
+	public function isDouble()
+	{
+		return $this->isExpectedType();
+	}
+
+	/**
+	 * is the value under test less than what we expect?
+	 *
+	 * @param  double $expected  the value we expect to be less than
+	 * @return ComparisonResult
+	 */
+	public function isLessThan($expected)
+	{
+		// do we really have a double to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is our value less than the expected value?
+		if ($this->value >= $expected) {
+			$result->setHasFailed("< {$expected}", $this->value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}
+
+	/**
+	 * is the value under test less than or equal to what we expect?
+	 *
+	 * @param  double $expected
+	 *         the value we expect to be less than or equal to
+	 * @return ComparisonResult
+	 */
+	public function isLessThanOrEqualTo($expected)
+	{
+		// do we really have a double to test?
+		$result = $this->isExpectedType();
+		if ($result->hasFailed()) {
+			return $result;
+		}
+
+		// is our value less than or equal to the expected value?
+		if ($this->value > $expected) {
+			$result->setHasFailed("<= {$expected}", $this->value);
+			return $result;
+		}
+
+		// success
+		return $result;
+	}}
