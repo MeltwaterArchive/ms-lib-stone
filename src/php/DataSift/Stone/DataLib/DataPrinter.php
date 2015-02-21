@@ -218,4 +218,24 @@ class DataPrinter
     {
         return var_export($input, true);
     }
+
+    public function convertToStringWithTypeInformation($input)
+    {
+        // what do we have?
+        $value   = $this->convertToString($input);
+        $type    = gettype($input);
+
+        // special cases
+        switch ($type) {
+            case "string":
+                $value = "(string)'{$value}'";
+                break;
+            default:
+                $value = "({$type})$value";
+        }
+
+        // all done
+        return $value;
+
+    }
 }
