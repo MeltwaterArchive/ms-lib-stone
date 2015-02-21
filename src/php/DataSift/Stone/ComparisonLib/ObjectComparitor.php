@@ -181,7 +181,7 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (!isset($this->value->$attribute)) {
+		if (!isset($this->value->$attribute) && @!is_null($this->value->$attribute)) {
 			$printer = new DataPrinter;
 			$msgValue = $printer->convertToStringWithTypeInformation($value);
 
