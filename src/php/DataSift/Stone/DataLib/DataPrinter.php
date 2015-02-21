@@ -123,6 +123,9 @@ class DataPrinter
             }
             return 'false';
         }
+        if (is_null($mixed)) {
+            return "NULL";
+        }
 
         // if we get here, then no complicated conversion required
         return (string)$mixed;
@@ -214,5 +217,25 @@ class DataPrinter
     public function convertToVarexport($input)
     {
         return var_export($input, true);
+    }
+
+    public function convertToStringWithTypeInformation($input)
+    {
+        // what do we have?
+        $value   = $this->convertToString($input);
+        $type    = gettype($input);
+
+        // special cases
+        switch ($type) {
+            case "string":
+                $value = "(string)'{$value}'";
+                break;
+            default:
+                $value = "({$type})$value";
+        }
+
+        // all done
+        return $value;
+
     }
 }

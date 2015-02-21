@@ -43,6 +43,8 @@
 
 namespace DataSift\Stone\ComparisonLib;
 
+use DataSift\Stone\DataLib\DataPrinter;
+
 /**
  * Base class for all comparison classes
  *
@@ -344,5 +346,23 @@ abstract class ComparitorBase
 
 		// all done
 		return $result;
+	}
+
+	// ==================================================================
+	//
+	// Helpers go here
+	//
+	// ------------------------------------------------------------------
+
+	/**
+	 * get a detailed description of our actual value, including its type
+	 * and contents
+	 *
+	 * @return string
+	 */
+	public function getValueForLogMessage()
+	{
+		$printer = new DataPrinter;
+		return $printer->convertToStringWithTypeInformation($this->value);
 	}
 }
