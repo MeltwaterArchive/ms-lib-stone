@@ -123,6 +123,9 @@ class DataPrinter
             }
             return 'false';
         }
+        if (is_null($mixed)) {
+            return "NULL";
+        }
 
         // if we get here, then no complicated conversion required
         return (string)$mixed;
