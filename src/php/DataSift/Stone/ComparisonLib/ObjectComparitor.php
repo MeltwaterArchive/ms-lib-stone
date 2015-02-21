@@ -190,7 +190,7 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// compare the values of the two
-		$comparitor = $this->getComparitorFor($this->value->attribute);
+		$comparitor = $this->getComparitorFor($this->value->$attribute);
 		$result = $comparitor->equals($value);
 
 		// all done
