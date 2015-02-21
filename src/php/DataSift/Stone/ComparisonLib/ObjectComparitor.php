@@ -43,6 +43,7 @@
 
 namespace DataSift\Stone\ComparisonLib;
 
+use DataSift\Stone\DataLib\DataPrinter;
 use DataSift\Stone\TypeLib\TypeConvertor;
 
 /**
@@ -180,13 +181,16 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (!isset($this->value->$attribute)) {
-			$result->setHasFailed("attribute '{$attribute}' with value '{$value}'", "attribute does not exist");
+		if (!isset($this->value->$attribute) && @!is_null($this->value->$attribute)) {
+			$printer = new DataPrinter;
+			$msgValue = $printer->convertToStringWithTypeInformation($value);
+
+			$result->setHasFailed("attribute '{$attribute}' with value {$msgValue}", "attribute does not exist");
 			return $result;
 		}
 
 		// compare the values of the two
-		$comparitor = $this->getComparitorFor($this->value->attribute);
+		$comparitor = $this->getComparitorFor($this->value->$attribute);
 		$result = $comparitor->equals($value);
 
 		// all done
