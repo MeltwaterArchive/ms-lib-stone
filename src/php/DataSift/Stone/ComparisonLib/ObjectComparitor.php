@@ -181,7 +181,8 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (!isset($this->value->$attribute) && @!is_null($this->value->$attribute)) {
+		$attributes = get_object_vars($this->value);
+		if (!array_key_exists($attribute, $attributes)) {
 			$printer = new DataPrinter;
 			$msgValue = $printer->convertToStringWithTypeInformation($value);
 
