@@ -215,13 +215,14 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (!isset($this->value->$attribute)) {
+		$attributes = get_object_vars($this->value);
+		if (!array_key_exists($attribute, $attributes)) {
 			// no, it does not
 			return $result;
 		}
 
 		// compare the values of the two
-		$comparitor = $this->getComparitorFor($this->value->attribute);
+		$comparitor = $this->getComparitorFor($this->value->$attribute);
 		$result = $comparitor->doesNotEqual($value);
 
 		// all done
