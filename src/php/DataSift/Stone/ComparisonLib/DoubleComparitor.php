@@ -132,7 +132,7 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value greater than the expected value?
 		if ($this->value <= $expected) {
-			$result->setHasFailed("> {$expected}", $this->value);
+			$result->setHasFailed("> {$expected}", "<= {$expected}");
 			return $result;
 		}
 
@@ -157,7 +157,7 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value greater than the expected value?
 		if ($this->value < $expected) {
-			$result->setHasFailed(">= {$expected}", $this->value);
+			$result->setHasFailed(">= {$expected}", "< {$expected}");
 			return $result;
 		}
 
@@ -190,7 +190,7 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value less than the expected value?
 		if ($this->value >= $expected) {
-			$result->setHasFailed("< {$expected}", $this->value);
+			$result->setHasFailed("< {$expected}", ">= {$expected}");
 			return $result;
 		}
 
@@ -215,10 +215,11 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value less than or equal to the expected value?
 		if ($this->value > $expected) {
-			$result->setHasFailed("<= {$expected}", $this->value);
+			$result->setHasFailed("<= {$expected}", "> {$expected}");
 			return $result;
 		}
 
 		// success
 		return $result;
-	}}
+	}
+}

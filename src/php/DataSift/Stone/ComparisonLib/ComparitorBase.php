@@ -177,7 +177,7 @@ abstract class ComparitorBase
 			$result->setHasPassed();
 		}
 		else {
-			$result->setHasFailed($differences, '');
+			$result->setHasFailed("two values are equal", "two values are different" . PHP_EOL . $differences);
 		}
 
 		// tidy up after ourselves
@@ -201,7 +201,7 @@ abstract class ComparitorBase
 
 		// negate the result
 		if ($result->hasPassed()) {
-			$result->setHasFailed("not the same", "values were the same");
+			$result->setHasFailed("two values are different", "two values are equal");
 		}
 		else {
 			$result->setHasPassed();
@@ -312,7 +312,20 @@ abstract class ComparitorBase
 	 */
 	public function getValueForLogMessage()
 	{
+		return $this->convertForLogMessage($this->value);
+	}
+
+	/**
+	 * get a detailed description of a value, including its type and contents
+	 *
+	 * @param  mixed $value
+	 *         data to be described
+	 * @return string
+	 *         of the form: (<type>)<value>
+	 */
+	public function convertForLogMessage($value)
+	{
 		$printer = new DataPrinter;
-		return $printer->convertToStringWithTypeInformation($this->value);
+		return $printer->convertToStringWithTypeInformation($value);
 	}
 }

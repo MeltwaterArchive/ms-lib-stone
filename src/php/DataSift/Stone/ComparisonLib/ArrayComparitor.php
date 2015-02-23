@@ -127,7 +127,8 @@ class ArrayComparitor extends ComparitorBase
 
 		// is the value present?
 		if (!in_array($value, $this->value)) {
-			$result->setHasFailed($value, "value not found");
+			$logValue = $this->convertForLogMessage($value);
+			$result->setHasFailed("contains value $logValue", "value not found");
 			return $result;
 		}
 
@@ -151,7 +152,8 @@ class ArrayComparitor extends ComparitorBase
 
 		// is the value present?
 		if (in_array($value, $this->value)) {
-			$result->setHasFailed("value not found", $value);
+			$logValue = $this->convertForLogMessage($value);
+			$result->setHasFailed("value not found", "contains value $logValue");
 			return $result;
 		}
 
