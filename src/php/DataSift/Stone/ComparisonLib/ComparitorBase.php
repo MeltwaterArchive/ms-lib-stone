@@ -298,56 +298,6 @@ abstract class ComparitorBase
 		return $this->isExpectedType();
 	}
 
-	/**
-	 * is our value under test the same variable that $expected is?
-	 *
-	 * this test might only be reliable for objects!
-	 *
-	 * @param  mixed  $expected  the variable to compare against
-	 * @return ComparisonResult
-	 */
-	public function isSameAs(&$expected)
-	{
-		// our return value
-		$result = new ComparisonResult();
-
-		// test for absolute equivalence
-		if ($this->value === $expected) {
-			$result->setHasPassed();
-		}
-		else {
-			$result->setHasFailed("same variable", "not same variable");
-		}
-
-		// all done
-		return $result;
-	}
-
-	/**
-	 * is our value under test NOT the same variable that $expected is?
-	 *
-	 * this test might only be reliable for objects!
-	 *
-	 * @param  mixed  $expected  the variable to compare against
-	 * @return ComparisonResult
-	 */
-	public function isNotSameAs(&$expected)
-	{
-		// our return value
-		$result = new ComparisonResult();
-
-		// test for absolute equivalence
-		if ($this->value !== $expected) {
-			$result->setHasPassed();
-		}
-		else {
-			$result->setHasFailed("different variable", "same variable");
-		}
-
-		// all done
-		return $result;
-	}
-
 	// ==================================================================
 	//
 	// Helpers go here

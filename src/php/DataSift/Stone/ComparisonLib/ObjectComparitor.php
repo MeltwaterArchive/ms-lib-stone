@@ -256,6 +256,52 @@ class ObjectComparitor extends ComparitorBase
 	}
 
 	/**
+	 * is our value under test the same variable that $expected is?
+	 *
+	 * @param  object  $expected  the variable to compare against
+	 * @return ComparisonResult
+	 */
+	public function isSameAs($expected)
+	{
+		// our return value
+		$result = new ComparisonResult();
+
+		// test for absolute equivalence
+		if ($this->value === $expected) {
+			$result->setHasPassed();
+		}
+		else {
+			$result->setHasFailed("same variable", "not same variable");
+		}
+
+		// all done
+		return $result;
+	}
+
+	/**
+	 * is our value under test NOT the same variable that $expected is?
+	 *
+	 * @param  object $expected  the variable to compare against
+	 * @return ComparisonResult
+	 */
+	public function isNotSameAs($expected)
+	{
+		// our return value
+		$result = new ComparisonResult();
+
+		// test for absolute equivalence
+		if ($this->value !== $expected) {
+			$result->setHasPassed();
+		}
+		else {
+			$result->setHasFailed("different variable", "same variable");
+		}
+
+		// all done
+		return $result;
+	}
+
+	/**
 	 * does the object under test have a given method name?
 	 *
 	 * @param  string  $methodName the method to test for
