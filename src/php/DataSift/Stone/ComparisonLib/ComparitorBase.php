@@ -166,8 +166,8 @@ abstract class ComparitorBase
 		// write both normalised values out to temporary files
 		$tmpNam1 = tempnam(sys_get_temp_dir(), "storyteller-diffA-");
 		$tmpNam2 = tempnam(sys_get_temp_dir(), "storyteller-diffB-");
-		file_put_contents($tmpNam1, $sourceA);
-		file_put_contents($tmpNam2, $sourceB);
+		file_put_contents($tmpNam1, $sourceA . PHP_EOL);
+		file_put_contents($tmpNam2, $sourceB . PHP_EOL);
 
 		// diff the two files to see what has changed
 		$differences = trim(`diff -u $tmpNam1 $tmpNam2`);
