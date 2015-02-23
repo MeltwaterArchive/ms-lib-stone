@@ -90,30 +90,30 @@ class DoubleComparitor extends ComparitorBase
 	//
 	// ------------------------------------------------------------------
 
-	/**
-	 * test our data to see if it has the same value as another double
-	 *
-	 * @param  double $expected
-	 *         the value to compare against
-	 * @return ComparisonResult
-	 */
-	public function equals($expected)
-	{
-		// do we really have a double to test?
-		$result = $this->isExpectedType();
-		if ($result->hasFailed()) {
-			return $result;
-		}
+	// /**
+	//  * test our data to see if it has the same value as another double
+	//  *
+	//  * @param  double $expected
+	//  *         the value to compare against
+	//  * @return ComparisonResult
+	//  */
+	// public function equals($expected)
+	// {
+	// 	// do we really have a double to test?
+	// 	$result = $this->isExpectedType();
+	// 	if ($result->hasFailed()) {
+	// 		return $result;
+	// 	}
 
-		// is our value the expected value?
-		if ($this->value != $expected) {
-			$result->setHasFailed($expected, $this->value);
-			return $result;
-		}
+	// 	// is our value the expected value?
+	// 	if ($this->value != $expected) {
+	// 		$result->setHasFailed("two values are equal", "two values are not equal");
+	// 		return $result;
+	// 	}
 
-		// success
-		return $result;
-	}
+	// 	// success
+	// 	return $result;
+	// }
 
 	/**
 	 * is the value under test greater than what we expect?
@@ -132,7 +132,7 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value greater than the expected value?
 		if ($this->value <= $expected) {
-			$result->setHasFailed("> {$expected}", $this->value);
+			$result->setHasFailed("> {$expected}", "<= {$expected}");
 			return $result;
 		}
 
@@ -157,7 +157,7 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value greater than the expected value?
 		if ($this->value < $expected) {
-			$result->setHasFailed(">= {$expected}", $this->value);
+			$result->setHasFailed(">= {$expected}", "< {$expected}");
 			return $result;
 		}
 
@@ -190,7 +190,7 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value less than the expected value?
 		if ($this->value >= $expected) {
-			$result->setHasFailed("< {$expected}", $this->value);
+			$result->setHasFailed("< {$expected}", ">= {$expected}");
 			return $result;
 		}
 
@@ -215,10 +215,11 @@ class DoubleComparitor extends ComparitorBase
 
 		// is our value less than or equal to the expected value?
 		if ($this->value > $expected) {
-			$result->setHasFailed("<= {$expected}", $this->value);
+			$result->setHasFailed("<= {$expected}", "> {$expected}");
 			return $result;
 		}
 
 		// success
 		return $result;
-	}}
+	}
+}

@@ -181,7 +181,8 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (!isset($this->value->$attribute) && @!is_null($this->value->$attribute)) {
+		$attributes = get_object_vars($this->value);
+		if (!array_key_exists($attribute, $attributes)) {
 			$printer = new DataPrinter;
 			$msgValue = $printer->convertToStringWithTypeInformation($value);
 
@@ -251,6 +252,52 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// success
+		return $result;
+	}
+
+	/**
+	 * is our value under test the same variable that $expected is?
+	 *
+	 * @param  object  $expected  the variable to compare against
+	 * @return ComparisonResult
+	 */
+	public function isSameAs($expected)
+	{
+		// our return value
+		$result = new ComparisonResult();
+
+		// test for absolute equivalence
+		if ($this->value === $expected) {
+			$result->setHasPassed();
+		}
+		else {
+			$result->setHasFailed("same variable", "not same variable");
+		}
+
+		// all done
+		return $result;
+	}
+
+	/**
+	 * is our value under test NOT the same variable that $expected is?
+	 *
+	 * @param  object $expected  the variable to compare against
+	 * @return ComparisonResult
+	 */
+	public function isNotSameAs($expected)
+	{
+		// our return value
+		$result = new ComparisonResult();
+
+		// test for absolute equivalence
+		if ($this->value !== $expected) {
+			$result->setHasPassed();
+		}
+		else {
+			$result->setHasFailed("different variable", "same variable");
+		}
+
+		// all done
 		return $result;
 	}
 

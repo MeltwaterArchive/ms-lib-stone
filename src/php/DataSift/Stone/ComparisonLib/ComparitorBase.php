@@ -166,18 +166,18 @@ abstract class ComparitorBase
 		// write both normalised values out to temporary files
 		$tmpNam1 = tempnam(sys_get_temp_dir(), "storyteller-diffA-");
 		$tmpNam2 = tempnam(sys_get_temp_dir(), "storyteller-diffB-");
-		file_put_contents($tmpNam1, $sourceA);
-		file_put_contents($tmpNam2, $sourceB);
+		file_put_contents($tmpNam1, $sourceA . PHP_EOL);
+		file_put_contents($tmpNam2, $sourceB . PHP_EOL);
 
 		// diff the two files to see what has changed
-		$differences = trim(`diff -u $tmpNam1 $tmpNam2`);
+		$differences = trim(`diff -ud --label=EXPECTED $tmpNam1 --label=ACTUAL $tmpNam2`);
 
 		// how did we do?
 		if (empty($differences)) {
 			$result->setHasPassed();
 		}
 		else {
-			$result->setHasFailed($differences, '');
+			$result->setHasFailed("two values are equal", "two values are different" . PHP_EOL . $differences);
 		}
 
 		// tidy up after ourselves
@@ -201,7 +201,7 @@ abstract class ComparitorBase
 
 		// negate the result
 		if ($result->hasPassed()) {
-			$result->setHasFailed("not the same", "values were the same");
+			$result->setHasFailed("two values are different", "two values are equal");
 		}
 		else {
 			$result->setHasPassed();
@@ -298,56 +298,6 @@ abstract class ComparitorBase
 		return $this->isExpectedType();
 	}
 
-	/**
-	 * is our value under test the same variable that $expected is?
-	 *
-	 * this test might only be reliable for objects!
-	 *
-	 * @param  mixed  $expected  the variable to compare against
-	 * @return ComparisonResult
-	 */
-	public function isSameAs(&$expected)
-	{
-		// our return value
-		$result = new ComparisonResult();
-
-		// test for absolute equivalence
-		if ($this->value === $expected) {
-			$result->setHasPassed();
-		}
-		else {
-			$result->setHasFailed("same variable", "not same variable");
-		}
-
-		// all done
-		return $result;
-	}
-
-	/**
-	 * is our value under test NOT the same variable that $expected is?
-	 *
-	 * this test might only be reliable for objects!
-	 *
-	 * @param  mixed  $expected  the variable to compare against
-	 * @return ComparisonResult
-	 */
-	public function isNotSameAs(&$expected)
-	{
-		// our return value
-		$result = new ComparisonResult();
-
-		// test for absolute equivalence
-		if ($this->value !== $expected) {
-			$result->setHasPassed();
-		}
-		else {
-			$result->setHasFailed("different variable", "same variable");
-		}
-
-		// all done
-		return $result;
-	}
-
 	// ==================================================================
 	//
 	// Helpers go here
@@ -362,7 +312,20 @@ abstract class ComparitorBase
 	 */
 	public function getValueForLogMessage()
 	{
+		return $this->convertForLogMessage($this->value);
+	}
+
+	/**
+	 * get a detailed description of a value, including its type and contents
+	 *
+	 * @param  mixed $value
+	 *         data to be described
+	 * @return string
+	 *         of the form: (<type>)<value>
+	 */
+	public function convertForLogMessage($value)
+	{
 		$printer = new DataPrinter;
-		return $printer->convertToStringWithTypeInformation($this->value);
+		return $printer->convertToStringWithTypeInformation($value);
 	}
 }

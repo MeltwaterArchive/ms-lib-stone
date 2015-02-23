@@ -96,23 +96,23 @@ class IntegerComparitor extends ComparitorBase
 	 *         the value to compare against
 	 * @return ComparisonResult
 	 */
-	public function equals($expected)
-	{
-		// do we really have an integer to test?
-		$result = $this->isExpectedType();
-		if ($result->hasFailed()) {
-			return $result;
-		}
+	// public function equals($expected)
+	// {
+	// 	// do we really have an integer to test?
+	// 	$result = $this->isExpectedType();
+	// 	if ($result->hasFailed()) {
+	// 		return $result;
+	// 	}
 
-		// is our value the expected value?
-		if ($this->value != $expected) {
-			$result->setHasFailed($expected, $this->value);
-			return $result;
-		}
+	// 	// is our value the expected value?
+	// 	if ($this->value != $expected) {
+	// 		$result->setHasFailed($expected, $this->value);
+	// 		return $result;
+	// 	}
 
-		// success
-		return $result;
-	}
+	// 	// success
+	// 	return $result;
+	// }
 
 	/**
 	 * is the value under test greater than what we expect?
@@ -131,7 +131,7 @@ class IntegerComparitor extends ComparitorBase
 
 		// is our value greater than the expected value?
 		if ($this->value <= $expected) {
-			$result->setHasFailed("> {$expected}", $this->value);
+			$result->setHasFailed("> {$expected}", "<= {$expected}");
 			return $result;
 		}
 
@@ -156,7 +156,7 @@ class IntegerComparitor extends ComparitorBase
 
 		// is our value greater than the expected value?
 		if ($this->value < $expected) {
-			$result->setHasFailed(">= {$expected}", $this->value);
+			$result->setHasFailed(">= {$expected}", "< {$expected}");
 			return $result;
 		}
 
@@ -189,7 +189,7 @@ class IntegerComparitor extends ComparitorBase
 
 		// is our value less than the expected value?
 		if ($this->value >= $expected) {
-			$result->setHasFailed("< {$expected}", $this->value);
+			$result->setHasFailed("< {$expected}", ">= {$expected}");
 			return $result;
 		}
 
@@ -214,7 +214,7 @@ class IntegerComparitor extends ComparitorBase
 
 		// is our value less than or equal to the expected value?
 		if ($this->value > $expected) {
-			$result->setHasFailed("<= {$expected}", $this->value);
+			$result->setHasFailed("<= {$expected}", "> {$expected}");
 			return $result;
 		}
 
