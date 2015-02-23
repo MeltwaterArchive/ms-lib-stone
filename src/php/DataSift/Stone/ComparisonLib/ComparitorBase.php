@@ -170,7 +170,7 @@ abstract class ComparitorBase
 		file_put_contents($tmpNam2, $sourceB . PHP_EOL);
 
 		// diff the two files to see what has changed
-		$differences = trim(`diff -u $tmpNam1 $tmpNam2`);
+		$differences = trim(`diff -ud --label=EXPECTED $tmpNam1 --label=ACTUAL $tmpNam2`);
 
 		// how did we do?
 		if (empty($differences)) {
