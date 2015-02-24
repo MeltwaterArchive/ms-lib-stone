@@ -62,8 +62,7 @@ class StringComparitor extends ComparitorBase
 	// ------------------------------------------------------------------
 
 	/**
-	 * is the data that we're examining a string, or convertable to a
-	 * string?
+	 * is the data that we're examining a string?
 	 *
 	 * @return ComparisonResult
 	 */
@@ -74,17 +73,8 @@ class StringComparitor extends ComparitorBase
 
 		$string = $this->value;
 
-		if (is_string($string)) {
-			$result->setHasPassed();
-			return $result;
-		}
-
-		// force the type conversion
-		$string = (string)$string;
-
-		// now, do we still have a string?
-		if (empty($string)) {
-			$result->setHasFailed("string", gettype($this->value));
+		if (!is_string($string)) {
+			$result->setHasFailed("string", gettype($string));
 			return $result;
 		}
 
