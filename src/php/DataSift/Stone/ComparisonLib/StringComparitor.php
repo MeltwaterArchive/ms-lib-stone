@@ -383,16 +383,18 @@ class StringComparitor extends ComparitorBase
 			return $result;
 		}
 
-		if(count($expected) == 0){
+		if (count($expected) == 0) {
+			$result->setHasFailed("value in array", "the array is empty");
 			return $result;
 		}
 
-		foreach ($expected as $possibleValue) {
-			if($this->value == $possibleValue){
-				$result->setHasPassed();
-				break;
-			}
+		if (!in_array($this->value, $expected)) {
+			$result->setHasFailed("value in array", "value is not in the array");
+			return $result;
 		}
+
+		// success!
+		$result->setHasPassed();
 		return $result;
-	}	
+	}
 }
