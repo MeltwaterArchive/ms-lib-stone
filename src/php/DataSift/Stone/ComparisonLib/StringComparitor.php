@@ -194,6 +194,11 @@ class StringComparitor extends ComparitorBase
 		return $result;
 	}
 
+	/**
+	 * is the data that we're examining a Universally-Unique-ID?
+	 *
+	 * @return ComparisonResult
+	 */
 	public function isUuid()
 	{
 		// do we have a non-empty string to start off with?
@@ -366,8 +371,9 @@ class StringComparitor extends ComparitorBase
 	/**
 	* Given an array of possible values, is the current value in the list of possibilities?
 	*
-	* @param  array $expected the array/list of possible values $this->value could be equal to in
-	* order to pass
+	* @param  array $expected
+	*         the array/list of possible values $this->value could be equal
+	*         to in order to pass
 	* @return ComparisonResult
 	*/
 	public function isIn($expected = array())
