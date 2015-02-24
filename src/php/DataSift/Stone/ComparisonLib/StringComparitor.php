@@ -160,7 +160,7 @@ class StringComparitor extends ComparitorBase
 	 *
 	 * @return ComparisonResult
 	 */
-	public function isHash()
+	public function isHash($expectedLength = null)
 	{
 		// do we have a non-empty string to start off with?
 		$result = $this->isNotEmpty();
@@ -180,6 +180,14 @@ class StringComparitor extends ComparitorBase
 		if ($length % 2 != 0) {
 			$result->setHasFailed("valid hex string of even length", "string '{$this->value}' has odd length '{$length}'");
 			return $result;
+		}
+
+		// have we been told how long the hash should be (e.g. 32 characters)?
+		if ($expectedLength !== null) {
+			if ($length != $expectedLength) {
+				$result->setHasFailed("valid hex string of length {$expectedLength}", "string of length {$length}");
+				return $result;
+			}
 		}
 
 		// success
