@@ -171,14 +171,14 @@ class StringComparitor extends ComparitorBase
 		// let's make sure it is a hash
 		$match = preg_match("/^[A-Fa-f0-9]+$/", $this->value);
 		if (!$match) {
-			$result->setHasFailed("valid hex string", $this->value);
+			$result->setHasFailed("valid hex string", "contains non-hex character(s)");
 			return $result;
 		}
 
 		// let's make sure it's the right length
 		$length = strlen($this->value);
 		if ($length % 2 != 0) {
-			$result->setHasFailed("valid hex string of even length", "string '{$this->value}' has odd length '{$length}'");
+			$result->setHasFailed("valid hex string of even length", "string of odd length {$length}");
 			return $result;
 		}
 
@@ -202,10 +202,11 @@ class StringComparitor extends ComparitorBase
 			return $result;
 		}
 
-		// let's make sure it is a hash
+		// let's make sure it is a hash with the dashes in the
+		// correct places
 		$match = preg_match("/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/", $this->value);
 		if (!$match) {
-			$result->setHasFailed("valid UUID-format hex string", $this->value);
+			$result->setHasFailed("valid UUID-format hex string", "not a UUID-format string");
 			return $result;
 		}
 
@@ -354,7 +355,7 @@ class StringComparitor extends ComparitorBase
 
 		// is it what we expected?
 		if ($start == $expected) {
-			$result->setHasFailed("does not start with '{$expected}'", "starts with '{$ending}'");
+			$result->setHasFailed("does not start with '{$expected}'", "starts with '{$start}'");
 			return $result;
 		}
 
