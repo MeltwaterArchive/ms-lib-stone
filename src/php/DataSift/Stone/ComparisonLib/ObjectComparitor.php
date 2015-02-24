@@ -43,6 +43,7 @@
 
 namespace DataSift\Stone\ComparisonLib;
 
+use IteratorAggregate;
 use DataSift\Stone\DataLib\DataPrinter;
 use DataSift\Stone\TypeLib\TypeConvertor;
 
@@ -129,7 +130,8 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (!isset($this->value->$attribute)) {
+		$attributes = $this->getAttributeList();
+		if (!array_key_exists($attribute, $attributes)) {
 			$result->setHasFailed("has attribute '{$attribute}'", "does not have attribute '{$attribute}'");
 			return $result;
 		}
@@ -153,7 +155,8 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		if (isset($this->value->$attribute)) {
+		$attributes = $this->getAttributeList();
+		if (array_key_exists($attribute, $attributes)) {
 			$result->setHasFailed("does not have attribute '{$attribute}'", "has attribute '{$attribute}'");
 			return $result;
 		}
@@ -181,7 +184,7 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		$attributes = get_object_vars($this->value);
+		$attributes = $this->getAttributeList();
 		if (!array_key_exists($attribute, $attributes)) {
 			$printer = new DataPrinter;
 			$msgValue = $printer->convertToStringWithTypeInformation($value);
@@ -215,7 +218,7 @@ class ObjectComparitor extends ComparitorBase
 		}
 
 		// does the attribute exist?
-		$attributes = get_object_vars($this->value);
+		$attributes = $this->getAttributeList();
 		if (!array_key_exists($attribute, $attributes)) {
 			// no, it does not
 			return $result;
@@ -434,5 +437,48 @@ class ObjectComparitor extends ComparitorBase
 	public function isObject()
 	{
 		return $this->isExpectedType();
+	}
+
+	// ==================================================================
+	//
+	// Helpers
+	//
+	// ------------------------------------------------------------------
+
+	/**
+	 * return a list of all of an object's public properties and their
+	 * values
+	 *
+	 * @return array
+	 */
+	protected function getAttributeList()
+	{
+		// is this a class that provides an iterator?
+		if ($this->value instanceof IteratorAggregate) {
+			return $this->getAttributeListByInteration();
+		}
+
+		// if we get here, we're going to assume that we can just use
+		// the available public properties
+		return get_object_vars($this->value);
+	}
+
+	/**
+	 * return a list of an object's public properties by iterating over
+	 * them
+	 *
+	 * this is automatically called by getAttributeList() if iteration is
+	 * the best approach to use
+	 *
+	 * @return array
+	 */
+	protected function getAttributeListByInteration()
+	{
+		$retval = [];
+		foreach ($this->value as $key => $value) {
+			$retval[$key] = $value;
+		}
+
+		return $retval;
 	}
 }
