@@ -331,7 +331,15 @@ class HttpClient
 
         // if we get here, we need to make a new connection
         $connection = new HttpClientConnection();
-        if (!$connection->connect($address, $request->getTimeout(), $request->getShouldValidateSslCertificate()))
+
+        // We only set the read timeout if the user has
+        // specified one, otherwise there's a default
+        $readTimeout = $request->getReadTimeout();
+        if ($readTimeout !== null) {
+            $connection->setReadTimeout($readTimeout);
+        }
+
+        if (!$connection->connect($address, $request->getConnectionTimeout(), $request->getShouldValidateSslCertificate()))
         {
             throw new E5xx_HttpConnectFailed((string)$address, "error information not available");
         }
