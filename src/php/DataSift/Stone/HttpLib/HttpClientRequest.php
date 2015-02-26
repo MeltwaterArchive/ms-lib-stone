@@ -60,7 +60,7 @@ class HttpClientRequest
      * How long before we timeout on connect?
      * @var float
      */
-    private $connectTimeout = 5.0;
+    private $connectionTimeout = 5.0;
 
     /**
      * How long before we timeout on read?

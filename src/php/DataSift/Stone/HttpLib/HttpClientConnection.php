@@ -143,7 +143,7 @@ class HttpClientConnection
                 $transport . "://" . $address->hostname . ':' . $address->port,
                 $errno,
                 $errstr,
-                $timeout,
+                $connectTimeout,
                 STREAM_CLIENT_CONNECT,
                 $streamContext
             );
