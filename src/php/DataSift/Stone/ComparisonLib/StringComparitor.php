@@ -62,8 +62,7 @@ class StringComparitor extends ComparitorBase
 	// ------------------------------------------------------------------
 
 	/**
-	 * is the data that we're examining a string, or convertable to a
-	 * string?
+	 * is the data that we're examining a string?
 	 *
 	 * @return ComparisonResult
 	 */
@@ -74,17 +73,8 @@ class StringComparitor extends ComparitorBase
 
 		$string = $this->value;
 
-		if (is_string($string)) {
-			$result->setHasPassed();
-			return $result;
-		}
-
-		// force the type conversion
-		$string = (string)$string;
-
-		// now, do we still have a string?
-		if (empty($string)) {
-			$result->setHasFailed("string", gettype($this->value));
+		if (!is_string($string)) {
+			$result->setHasFailed("string", gettype($string));
 			return $result;
 		}
 
@@ -170,7 +160,7 @@ class StringComparitor extends ComparitorBase
 	 *
 	 * @return ComparisonResult
 	 */
-	public function isHash()
+	public function isHash($expectedLength = null)
 	{
 		// do we have a non-empty string to start off with?
 		$result = $this->isNotEmpty();
@@ -181,21 +171,34 @@ class StringComparitor extends ComparitorBase
 		// let's make sure it is a hash
 		$match = preg_match("/^[A-Fa-f0-9]+$/", $this->value);
 		if (!$match) {
-			$result->setHasFailed("valid hex string", $this->value);
+			$result->setHasFailed("valid hex string", "contains non-hex character(s)");
 			return $result;
 		}
 
 		// let's make sure it's the right length
 		$length = strlen($this->value);
 		if ($length % 2 != 0) {
-			$result->setHasFailed("valid hex string of even length", "string '{$this->value}' has odd length '{$length}'");
+			$result->setHasFailed("valid hex string of even length", "string of odd length {$length}");
 			return $result;
+		}
+
+		// have we been told how long the hash should be (e.g. 32 characters)?
+		if ($expectedLength !== null) {
+			if ($length != $expectedLength) {
+				$result->setHasFailed("valid hex string of length {$expectedLength}", "string of length {$length}");
+				return $result;
+			}
 		}
 
 		// success
 		return $result;
 	}
 
+	/**
+	 * is the data that we're examining a Universally-Unique-ID?
+	 *
+	 * @return ComparisonResult
+	 */
 	public function isUuid()
 	{
 		// do we have a non-empty string to start off with?
@@ -204,10 +207,11 @@ class StringComparitor extends ComparitorBase
 			return $result;
 		}
 
-		// let's make sure it is a hash
+		// let's make sure it is a hash with the dashes in the
+		// correct places
 		$match = preg_match("/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/", $this->value);
 		if (!$match) {
-			$result->setHasFailed("valid UUID-format hex string", $this->value);
+			$result->setHasFailed("valid UUID-format hex string", "not a UUID-format string");
 			return $result;
 		}
 
@@ -356,7 +360,7 @@ class StringComparitor extends ComparitorBase
 
 		// is it what we expected?
 		if ($start == $expected) {
-			$result->setHasFailed("does not start with '{$expected}'", "starts with '{$ending}'");
+			$result->setHasFailed("does not start with '{$expected}'", "starts with '{$start}'");
 			return $result;
 		}
 
@@ -367,8 +371,9 @@ class StringComparitor extends ComparitorBase
 	/**
 	* Given an array of possible values, is the current value in the list of possibilities?
 	*
-	* @param  array $expected the array/list of possible values $this->value could be equal to in
-	* order to pass
+	* @param  array $expected
+	*         the array/list of possible values $this->value could be equal
+	*         to in order to pass
 	* @return ComparisonResult
 	*/
 	public function isIn($expected = array())
@@ -378,16 +383,18 @@ class StringComparitor extends ComparitorBase
 			return $result;
 		}
 
-		if(count($expected) == 0){
+		if (count($expected) == 0) {
+			$result->setHasFailed("value in array", "the array is empty");
 			return $result;
 		}
 
-		foreach ($expected as $possibleValue) {
-			if($this->value == $possibleValue){
-				$result->setHasPassed();
-				break;
-			}
+		if (!in_array($this->value, $expected)) {
+			$result->setHasFailed("value in array", "value is not in the array");
+			return $result;
 		}
+
+		// success!
+		$result->setHasPassed();
 		return $result;
-	}	
+	}
 }
