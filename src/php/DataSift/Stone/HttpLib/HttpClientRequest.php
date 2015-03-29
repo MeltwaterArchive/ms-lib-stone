@@ -57,10 +57,16 @@ namespace DataSift\Stone\HttpLib;
 class HttpClientRequest
 {
     /**
-     * How long before we timeout?
-     * @var int
+     * How long before we timeout on connect?
+     * @var float
      */
-    private $timeout = 5;
+    private $connectionTimeout = 5.0;
+
+    /**
+     * How long before we timeout on read?
+     * @var float|null
+     */
+    private $readTimeout = null;
 
     /**
      * The URL we are connecting to
@@ -604,31 +610,60 @@ class HttpClientRequest
     }
 
     /**
-     * Some requests are expected to take more than our default
-     * timeout of 5 seconds. Use setTimeout to change the amount
-     * of time before we time out
+     * Some requests might take more than our default
+     * timeout of 5 seconds to connect. Use setConnectionTimeout
+     * to change the amount of time before we time out
      *
-     * @param int $timeout Time in seconds before the request fails
+     * @param float $timeout Time in seconds before the request fails
      *
      * @return void
      */
-    public function setTimeout($timeout)
+    public function setConnectionTimeout($timeout)
     {
-        if (!is_int($timeout)) {
-            throw new \Exception("HttpClientRequest::setTimeout() expects an integer");
+        if (!is_float($timeout)) {
+            throw new \Exception("HttpClientRequest::setReadTimeout() expects a float");
         }
 
-        $this->timeout = $timeout;
+        $this->connectionTimeout = $timeout;
     }
 
     /**
-     * Get the timeout in seconds for this request. Defaults to
-     * 5 seconds
+     * Get the connection timeout in seconds for this request.
+     * Defaults to 5 seconds
      *
      * @return int
      */
-    public function getTimeout()
+    public function getConnectionTimeout()
     {
-        return $this->timeout;
+        return $this->connectionTimeout;
+    }
+
+    /**
+     * Some requests might take more than our default
+     * timeout of 5 seconds. Use setReadTimeout
+     * to change the amount of time before we time out
+     *
+     * @param float $timeout Time in seconds before the request fails
+     *
+     * @return void
+     */
+    public function setReadTimeout($timeout)
+    {
+        if (!is_float($timeout)) {
+            throw new \Exception("HttpClientRequest::setReadTimeout() expects a float");
+        }
+
+        $this->readTimeout = $timeout;
+    }
+
+    /**
+     * Get the read timeout in seconds for this request.
+     * Defaults to 5 seconds
+     *
+     * @return int
+     */
+    public function getReadTimeout()
+    {
+        return $this->readTimeout;
     }
 }

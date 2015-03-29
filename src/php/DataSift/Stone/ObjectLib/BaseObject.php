@@ -43,6 +43,8 @@
 
 namespace DataSift\Stone\ObjectLib;
 
+use ArrayIterator;
+use IteratorAggregate;
 use ReflectionObject;
 use ReflectionProperty;
 use stdClass;
@@ -68,7 +70,7 @@ use Twig_Loader_String;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class BaseObject extends stdClass
+class BaseObject extends stdClass implements IteratorAggregate
 {
     // ====================================================================
     //
@@ -921,4 +923,13 @@ class BaseObject extends stdClass
         }
     }
 
+    /**
+     * support foreach() loops over our data
+     *
+     * @return \Traversable
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this);
+    }
 }
