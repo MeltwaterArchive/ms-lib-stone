@@ -108,7 +108,7 @@ abstract class ComparitorBase
 		$type = gettype($value);
 
 		// work out the classname we need
-		$className = __NAMESPACE__ . '\\' . ucfirst($type) . 'Comparitor';
+		$className = __NAMESPACE__ . '\\' . ucfirst(strtolower($type)) . 'Comparitor';
 
 		// do we have one?
 		if (!class_exists($className)) {
