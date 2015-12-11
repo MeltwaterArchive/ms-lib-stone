@@ -187,4 +187,32 @@ class BaseObjectTest extends PHPUnit_Framework_Testcase
         $this->assertEquals($expectedValue, $actualValue);
     }
 
+    public function testCanConvertToArray()
+    {
+        // ----------------------------------------------------------------
+        // setup your test
+
+        $testValue = "Hello, world";
+
+        $unit = new BaseObject;
+        $unit->testObj = new BaseObject;
+        $unit->testObj->testProperty = $testValue;
+
+        $expectedValue = [
+            'testObj' => [
+                'testProperty' => $testValue
+            ]
+        ];
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $actualValue = $unit->toArray();
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $this->assertEquals($expectedValue, $actualValue);
+    }
+
 }

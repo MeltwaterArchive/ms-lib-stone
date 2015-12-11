@@ -991,4 +991,25 @@ class BaseObject extends stdClass implements ArrayAccess, IteratorAggregate
             unset($this->$offset);
         }
     }
+
+    /**
+     * convert ourselves into a genuine PHP array
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $retval = [];
+        foreach (get_object_vars($this) as $key => $value) {
+            if (is_object($value) && method_exists($value, "toArray")) {
+                $retval[$key] = $value->toArray();
+            }
+            else {
+                $retval[$key] = $value;
+            }
+        }
+
+        // all done
+        return $retval;
+    }
 }
