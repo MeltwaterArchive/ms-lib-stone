@@ -43,7 +43,9 @@
 
 namespace DataSift\Stone\ObjectLib;
 
+use ArrayAccess;
 use ArrayIterator;
+use InvalidArgumentException;
 use IteratorAggregate;
 use ReflectionObject;
 use ReflectionProperty;
@@ -70,7 +72,7 @@ use Twig_Loader_String;
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://datasift.github.io/stone
  */
-class BaseObject extends stdClass implements IteratorAggregate
+class BaseObject extends stdClass implements ArrayAccess, IteratorAggregate
 {
     // ====================================================================
     //
@@ -931,5 +933,62 @@ class BaseObject extends stdClass implements IteratorAggregate
     public function getIterator()
     {
         return new ArrayIterator($this);
+    }
+
+    // ==================================================================
+    //
+    // ArrayAccess support
+    //
+    // ------------------------------------------------------------------
+
+    /**
+     * does this array key exist?
+     */
+    public function offsetExists ($offset)
+    {
+        return isset($this->$offset);
+    }
+
+    /**
+     * retrieve data from our databag
+     */
+    public function offsetGet($offset)
+    {
+        return $this->$offset;
+    }
+
+    /**
+     * set a value in our databag
+     *
+     * @param  mixed $offset
+     *         the array key to use
+     * @param  mixed $value
+     *         the value to store
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        // special case - we cannot cope with NULL
+        if ($offset === null) {
+            throw new InvalidArgumentException("BaseObject does not support appending to the end of an array");
+        }
+
+        $this->$offset = $value;
+    }
+
+    /**
+     * delete a value from our databag
+     *
+     * @param  mixed  $offset
+     *         the array key to delete
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        // NOTE: it is NOT an error to attempt to unset() something
+        // that does not exist
+        if (isset($this->$offset)) {
+            unset($this->$offset);
+        }
     }
 }
