@@ -143,4 +143,48 @@ class BaseObjectTest extends PHPUnit_Framework_Testcase
         $this->assertNotEquals($origObj, $clonedObj);
     }
 
+    public function testCanRetrieveDataAsIfAnArray()
+    {
+        // ----------------------------------------------------------------
+        // setup your test
+
+        $expectedValue = "Hello, world";
+
+        $unit = new BaseObject;
+        $unit->testObj = new BaseObject;
+        $unit->testObj->testProperty = $expectedValue;
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $actualValue = $unit['testObj']['testProperty'];
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $this->assertEquals($expectedValue, $actualValue);
+    }
+
+    public function testCanSetDataAsIfAnArray()
+    {
+        // ----------------------------------------------------------------
+        // setup your test
+
+        $expectedValue = "Hello, world";
+
+        $unit = new BaseObject;
+        $unit['testObj'] = new BaseObject;
+        $unit['testObj']['testProperty'] = $expectedValue;
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $actualValue = $unit->testObj->testProperty;
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $this->assertEquals($expectedValue, $actualValue);
+    }
+
 }
