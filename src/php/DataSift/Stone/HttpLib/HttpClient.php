@@ -150,7 +150,7 @@ class HttpClient
         }
         else {
             // send the payload too
-            $this->transport->sendBody($this->connection, $request);
+            $this->transport->sendBody($this->connection, $request, $request->getReadTimeout());
 
             // listen for a response with no timeout
             $response = $this->transport->readResponse($this->connection, $request);

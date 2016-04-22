@@ -321,7 +321,7 @@ class HttpClientConnection
         $line = fgets($this->socket);
 
         // all done
-        var_dump($line);
+        //var_dump($line);
         return $line;
     }
 
