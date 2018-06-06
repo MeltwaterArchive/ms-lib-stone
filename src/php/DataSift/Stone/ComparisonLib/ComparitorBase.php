@@ -163,6 +163,11 @@ abstract class ComparitorBase
 		$sourceA = var_export($expectedComparitor->getValueForComparison(), true);
 		$sourceB = var_export($this->getValueForComparison(), true);
 
+		if ($sourceA === $sourceB) {
+			$result->setHasPassed();
+			return $result;
+		}
+
 		// write both normalised values out to temporary files
 		$tmpNam1 = tempnam(sys_get_temp_dir(), "storyteller-diffA-");
 		$tmpNam2 = tempnam(sys_get_temp_dir(), "storyteller-diffB-");
@@ -171,14 +176,7 @@ abstract class ComparitorBase
 
 		// diff the two files to see what has changed
 		$differences = trim(`diff -ud --label=EXPECTED $tmpNam1 --label=ACTUAL $tmpNam2`);
-
-		// how did we do?
-		if (empty($differences)) {
-			$result->setHasPassed();
-		}
-		else {
-			$result->setHasFailed("two values are equal", "two values are different" . PHP_EOL . $differences);
-		}
+		$result->setHasFailed("two values are equal", "two values are different" . PHP_EOL . $differences);
 
 		// tidy up after ourselves
 		unlink($tmpNam1);
